@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { Star, MessageSquare, Video, Search, Briefcase, Mail, Filter, X } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
 
 const ALL_EXPERTS = [
   { name: "Dr. Anika Patel",    initials: "AP", role: "Partner",               company: "Sequoia Capital India",  domain: "Venture Capital",         tags: ["Fundraising", "SaaS", "EdTech"],          bio: "10+ years investing in early-stage startups. Led investments in 40+ companies including 3 unicorns.", sessions: 48,  rating: 4.9, available: true,  avatarBg: "#EF4444", experience: "10+ years", linkedin: "linkedin.com/in/anika-patel",    website: "anika.vc",           email: "anika@gsf.com" },
@@ -189,12 +190,13 @@ export default function ExpertsPage() {
               ))}
             </div>
           ) : (
-              <div className="text-center py-24">
-              <Search className="size-14 text-[#D2C4B4] mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-[#1A2332] dark:text-slate-100 mb-2">No experts found</h3>
-              <p className="text-sm text-[#8A95A3] dark:text-slate-400 mb-5">Try a different search term or domain filter.</p>
-              <button onClick={clearFilters} className="btn-outline text-sm py-2 px-5">Clear filters</button>
-            </div>
+            <EmptyState
+              icon="🔍"
+              title="No experts found"
+              description="Try a different search term or domain filter. Our expert network spans fundraising, product, growth, legal, and impact."
+              primaryAction={{ label: "Browse All Experts", href: "/experts" }}
+              secondaryAction={{ label: "Join GSF", href: "/sign-up" }}
+            />
           )}
         </section>
 
