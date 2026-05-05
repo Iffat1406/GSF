@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { Lightbulb, TrendingUp, MessageSquare, Shield, Percent, Eye, Heart, Search, ArrowRight, SlidersHorizontal, BarChart2, Rocket, DollarSign, Building2, BookOpen } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
 
 const AVATAR_COLORS = [
   { bg: "#DBEAFE", text: "#1E40AF" },
@@ -182,11 +183,13 @@ export default function VenturesPage() {
             </p>
 
             {filtered.length === 0 ? (
-              <div className="text-center py-20">
-                <Search className="size-10 text-[#8A95A3] mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-[#1A2332] mb-2">No ventures found</h3>
-                <p className="text-sm text-[#8A95A3]">Try adjusting your filters or search term.</p>
-              </div>
+              <EmptyState
+                icon="🚀"
+                title="No ventures found"
+                description="Try adjusting your filters or search term. Or be the first to list your startup idea and attract investors from the GSF network."
+                primaryAction={{ label: "List Your Venture", href: "/sign-up" }}
+                secondaryAction={{ label: "Clear Filters", href: "/ventures" }}
+              />
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {filtered.map((v) => {

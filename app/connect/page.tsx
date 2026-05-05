@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { Video, MessageSquare, Calendar, Search, Star, Clock, ArrowRight, Shield, Zap, Filter } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
 
 const EXPERTS = [
   { name: "Dr. Anika Patel",      initials: "AP", role: "Partner",               company: "Sequoia Capital India",  domain: "Fundraising & VC",     rating: 4.9, sessions: 48,  available: true,  tags: ["Fundraising", "SaaS", "EdTech"],        bg: "#EF4444" },
@@ -196,14 +197,14 @@ export default function ConnectPage() {
             </div>
 
             {filtered.length === 0 && (
-              <div className="text-center py-20">
-                <Search className="size-12 text-[#D2C4B4] mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-[#1A2332] mb-2">No experts found</h3>
-                <p className="text-sm text-[#8A95A3]">Try adjusting your search or filters.</p>
-                <button onClick={() => { setSearch(""); setDomain("All domains"); setAvailOnly(false); }}
-                  className="mt-4 btn-outline text-sm py-2 px-4">Clear filters</button>
-              </div>
-            )}
+              <EmptyState
+                icon="📅"
+                title="No experts found"
+                description="Try adjusting your search or filters. Our network has experts across fundraising, product, growth, legal, and more."
+                primaryAction={{ label: "Browse All Experts", href: "/experts" }}
+                secondaryAction={{ label: "Join GSF", href: "/sign-up" }}
+              />
+)}
           </div>
         </section>
 
