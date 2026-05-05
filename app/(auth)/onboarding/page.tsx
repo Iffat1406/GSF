@@ -36,11 +36,26 @@ export default function OnboardingPage() {
     setSaving(true);
     try {
       // Save metadata via API route (Clerk publicMetadata requires server-side update)
-      await fetch("/api/onboarding-complete", {
+      const res = await fetch("/api/onboarding-complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, credits: 600, plan: "basic" }),
+        body: JSON.stringify({ role }),
       });
+
+      if (res.status === 409) {
+        // Already onboarded — the server returned the existing role.
+        // Redirect to the correct dashboard without re-writing metadata.
+        const data = await res.json();
+        const existingRole = data.role as Role | undefined;
+        router.replace(existingRole === "expert" ? "/expert-dashboard" : "/dashboard");
+        return;
+      }
+
+      if (!res.ok) {
+        console.error("Onboarding failed", await res.text());
+        setSaving(false);
+        return;
+      }
 
       // Force a reload of the user object so Navbar picks up the new metadata
       await user.reload();
