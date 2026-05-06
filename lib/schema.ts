@@ -114,6 +114,9 @@ export const investmentInterests = pgTable("investment_interests", {
   status:         text("status").default("pending"), // pending, accepted, rejected
   message:        text("message"),
   createdAt:      timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
 // CREDIT BALANCES  (one row per user — source of truth)
 // ===================================================
 export const creditBalances = pgTable("credit_balances", {
