@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useVenture } from "@/lib/hooks/useVenture";
 import { Lightbulb, Edit3, TrendingUp, Users, DollarSign, Save, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 const STAGES  = ["Ideation", "Screening", "Research", "MVP", "Funding", "Launch", "PMF"];
 const SECTORS = ["EdTech", "FinTech", "HealthTech", "AgriTech", "ClimaTech", "SaaS", "Consumer", "DeepTech", "Other"];
@@ -66,7 +67,10 @@ export default function MyVenturePage() {
     if (ok) {
       setSaved(true);
       setEditing(false);
+      toast.success("Venture saved successfully!");
       setTimeout(() => setSaved(false), 2500);
+    } else {
+      toast.error("Something went wrong while saving your venture.");
     }
   }
 

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { AppToaster } from "@/components/feedback/AppToaster";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -58,11 +59,12 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
-        <body className="min-h-full font-sans" style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}>
+        <body suppressHydrationWarning className="min-h-full font-sans" style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}>
           <ThemeProvider>
             <PageTransition>
               {children}
             </PageTransition>
+            <AppToaster />
           </ThemeProvider>
         </body>
       </html>

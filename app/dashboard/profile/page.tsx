@@ -7,6 +7,7 @@ import { useProfile } from "@/lib/hooks/useProfile";
 import { useUser } from "@clerk/nextjs";
 import { User, Edit3, Save, Mail, Globe, Link2, MapPin, Camera } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 
 const fadeUp = (d = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -62,7 +63,10 @@ export default function ProfilePage() {
     if (ok) {
       setSaved(true);
       setEditing(false);
+      toast.success("Profile saved successfully!");
       setTimeout(() => setSaved(false), 2500);
+    } else {
+      toast.error("Something went wrong while saving your profile.");
     }
   }
 
@@ -72,9 +76,11 @@ export default function ProfilePage() {
     setUploadingPhoto(true);
     try {
       await clerkUser.setProfileImage({ file });
+      toast.success("Profile photo updated.");
       // clerkUser.imageUrl updates automatically via useUser() — no refetch needed
     } catch (err) {
       console.error("Photo upload failed:", err);
+      toast.error("Something went wrong while uploading your photo.");
     } finally {
       setUploadingPhoto(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { CreditTransaction } from "@/lib/schema";
+import { toast } from "sonner";
 
 export function useCredits() {
   const [balance,  setBalance]  = useState<number>(0);
@@ -18,7 +19,9 @@ export function useCredits() {
       setBalance(data.balance ?? 0);
       setLog(data.log ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error");
+      const message = err instanceof Error ? err.message : "Error";
+      setError(message);
+      toast.error("We couldn't load your credits right now.");
     } finally {
       setLoading(false);
     }

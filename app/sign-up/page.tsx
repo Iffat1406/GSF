@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Eye, EyeOff, Rocket, CheckCircle2, Star } from "lucide-react";
 import { useSignUp } from "@clerk/nextjs/legacy";
+import { toast } from "sonner";
 
 function GoogleIcon() {
   return (
@@ -25,6 +26,37 @@ const STEPS = ["Account", "Your Details", "Interests"];
 const SECTORS  = ["EdTech", "FinTech", "HealthTech", "AgriTech", "ClimaTech", "SaaS", "Consumer", "DeepTech", "Other"];
 const DOMAINS  = ["HealthTech", "FinTech", "EdTech", "Product", "Growth", "Legal", "AgriTech", "ClimaTech", "SaaS", "DeepTech", "Fundraising", "Operations"];
 
+type ClerkErrorShape = {
+  errors?: Array<{
+    message?: string;
+    longMessage?: string;
+    meta?: {
+      paramName?: string;
+    };
+  }>;
+};
+
+function getClerkErrorMessage(err: unknown, fallback: string) {
+  const clerkErr = err as ClerkErrorShape;
+  const firstError = clerkErr?.errors?.[0];
+
+  if (!firstError) return fallback;
+
+  const message = firstError.longMessage ?? firstError.message;
+  const paramName = firstError.meta?.paramName;
+
+  if (message && paramName) {
+    return `${message} (${paramName})`;
+  }
+
+  return message ?? fallback;
+}
+
+function showSignUpError(message: string, setError: (value: string) => void) {
+  setError(message);
+  toast.error(message);
+}
+
 export default function SignUpPage() {
   const router = useRouter();
   const { signUp, isLoaded } = useSignUp();
@@ -36,6 +68,7 @@ export default function SignUpPage() {
   const [verifying, setVerifying]   = useState(false);
   const [error, setError]     = useState("");
   const [code, setCode]       = useState("");
+  const [captchaReady, setCaptchaReady] = useState(false);
 
   const [f, setF] = useState({
     firstName: "", lastName: "", email: "", password: "",
@@ -58,6 +91,15 @@ export default function SignUpPage() {
 
   const isLast = step === STEPS.length - 1;
   const pct = (step / (STEPS.length - 1)) * 100;
+  const accountStepValid =
+    f.firstName.trim().length > 0 &&
+    f.lastName.trim().length > 0 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim()) &&
+    f.password.length >= 8;
+
+  useEffect(() => {
+    setCaptchaReady(true);
+  }, []);
 
   async function handleGoogleSignUp() {
     if (!isLoaded) return;
@@ -68,13 +110,37 @@ export default function SignUpPage() {
         redirectUrlComplete: "/onboarding",
       });
     } catch (err: unknown) {
-      const clerkErr = err as { errors?: { message: string }[] };
-      setError(clerkErr?.errors?.[0]?.message ?? "Google sign-up failed.");
+      showSignUpError(getClerkErrorMessage(err, "Google sign-up failed."), setError);
     }
   }
 
   async function createAccount() {
     if (!isLoaded) return;
+    if (!f.firstName.trim()) {
+      showSignUpError("Please enter your first name.", setError);
+      return;
+    }
+    if (!f.lastName.trim()) {
+      showSignUpError("Please enter your last name.", setError);
+      return;
+    }
+    if (!f.email.trim()) {
+      showSignUpError("Please enter your email address.", setError);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) {
+      showSignUpError("Please enter a valid email address.", setError);
+      return;
+    }
+    if (!f.password) {
+      showSignUpError("Please enter a password.", setError);
+      return;
+    }
+    if (f.password.length < 8) {
+      showSignUpError("Password must be at least 8 characters.", setError);
+      return;
+    }
+
     setSubmitting(true);
     setError("");
     try {
@@ -87,9 +153,9 @@ export default function SignUpPage() {
       // Send email verification
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setVerifying(true);
+      toast.success("Account created. Check your email for the verification code.");
     } catch (err: unknown) {
-      const clerkErr = err as { errors?: { message: string }[] };
-      setError(clerkErr?.errors?.[0]?.message ?? "Could not create account.");
+      showSignUpError(getClerkErrorMessage(err, "Could not create account."), setError);
     } finally {
       setSubmitting(false);
     }
@@ -103,13 +169,13 @@ export default function SignUpPage() {
       const result = await signUp.attemptEmailAddressVerification({ code });
       if (result.status === "complete") {
         // Account created — now go to onboarding to set role
+        toast.success("Email verified successfully.");
         router.push("/onboarding");
       } else {
-        setError("Verification could not complete. Please try again.");
+        showSignUpError("Verification could not complete. Please try again.", setError);
       }
     } catch (err: unknown) {
-      const clerkErr = err as { errors?: { message: string }[] };
-      setError(clerkErr?.errors?.[0]?.message ?? "Invalid code.");
+      showSignUpError(getClerkErrorMessage(err, "Invalid code."), setError);
     } finally {
       setSubmitting(false);
     }
@@ -256,6 +322,15 @@ export default function SignUpPage() {
                         </button>
                       </div>
                     </div>
+
+                    {captchaReady && (
+                      <div
+                        id="clerk-captcha"
+                        data-cl-theme="auto"
+                        data-cl-size="flexible"
+                        className="min-h-[78px]"
+                      />
+                    )}
                   </div>
                 )}
 
@@ -352,7 +427,7 @@ export default function SignUpPage() {
                 )}
                 <button
                   onClick={handleNext}
-                  disabled={submitting || !isLoaded}
+                  disabled={submitting || !isLoaded || !captchaReady || (step === 0 && !accountStepValid)}
                   className="btn-primary flex-1 py-2.5 justify-center"
                 >
                   {submitting

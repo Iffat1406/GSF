@@ -5,11 +5,12 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import React from "react";
+import { toast } from "sonner";
 import {
   ArrowUp, ArrowDown, MessageSquare, Share2, Bookmark, BookmarkCheck,
   PenSquare, TrendingUp, Clock, Flame, Search, Lightbulb, BarChart2,
   Rocket, DollarSign, Building2, Pin, Briefcase, Star, Users,
-  X, Send, CheckCircle2, Link2
+  X, Send, CheckCircle2
 } from "lucide-react";
 
 const AVATAR_COLORS = [
@@ -159,16 +160,10 @@ export default function CommunityPage() {
   const [expanded,   setExpanded]   = useState<string | null>(null);
   const [commentMap, setCommentMap] = useState<Record<string, string>>({});
   const [showCreate, setShowCreate] = useState(false);
-  const [toast,      setToast]      = useState<string | null>(null);
   const [newPost,    setNewPost]    = useState({ title: "", body: "", tag: "Founder Story" });
 
   // Load from localStorage on mount
   useEffect(() => { setPosts(loadPosts()); }, []);
-
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }
 
   function handleVote(postId: string, dir: 1 | -1) {
     setPosts(prev => {
@@ -189,7 +184,7 @@ export default function CommunityPage() {
       const next = prev.map(p => p.id === postId ? { ...p, saved: !p.saved } : p);
       savePosts(next);
       const post = next.find(p => p.id === postId);
-      showToast(post?.saved ? "Post saved to your library" : "Post removed from library");
+      toast.success(post?.saved ? "Post saved to your library." : "Post removed from your library.");
       return next;
     });
   }
@@ -199,17 +194,20 @@ export default function CommunityPage() {
     if (navigator.share) {
       try {
         await navigator.share({ title: post.title, text: post.body.slice(0, 100), url });
-        showToast("Shared successfully!");
+        toast.success("Shared successfully!");
       } catch { /* user cancelled */ }
     } else {
       navigator.clipboard.writeText(url);
-      showToast("Link copied to clipboard!");
+      toast.success("Link copied to clipboard!");
     }
   }
 
   function submitComment(postId: string) {
     const text = (commentMap[postId] || "").trim();
-    if (!text) return;
+    if (!text) {
+      toast.error("Write a comment before posting.");
+      return;
+    }
     const comment: Comment = {
       id: `c_${Date.now()}`, author: "You", initials: "YO",
       avatarColor: AVATAR_COLORS[4], text, time: timeAgo(),
@@ -220,11 +218,14 @@ export default function CommunityPage() {
       return next;
     });
     setCommentMap(m => ({ ...m, [postId]: "" }));
-    showToast("Comment posted!");
+    toast.success("Comment posted!");
   }
 
   function submitPost() {
-    if (!newPost.title.trim() || !newPost.body.trim()) return;
+    if (!newPost.title.trim() || !newPost.body.trim()) {
+      toast.error("Add both a title and story before publishing.");
+      return;
+    }
     const post: Post = {
       id: `up_${Date.now()}`,
       author: "You",
@@ -248,7 +249,7 @@ export default function CommunityPage() {
     });
     setNewPost({ title: "", body: "", tag: "Founder Story" });
     setShowCreate(false);
-    showToast("Post published to GSF Community!");
+    toast.success("Post published to GSF Community!");
   }
 
   const filtered = posts
@@ -564,14 +565,6 @@ export default function CommunityPage() {
         </div>
       )}
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-5 py-3 rounded-xl shadow-lg"
-          style={{ backgroundColor: "#1A2332", color: "white" }}>
-          <Link2 className="size-4 shrink-0" />
-          <span className="text-sm font-medium">{toast}</span>
-        </div>
-      )}
     </>
   );
 }

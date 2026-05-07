@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Eye, EyeOff, CheckCircle2, Rocket, Star } from "lucide-react";
 import { useSignIn } from "@clerk/nextjs/legacy";
+import { toast } from "sonner";
 
 /* Google icon */
 function GoogleIcon() {
@@ -50,16 +51,21 @@ export default function LoginPage() {
 
       if (result.status === "complete") {
         // Redirect to onboarding which will check role and route accordingly
+        toast.success("Signed in successfully.");
         router.push("/onboarding");
       } else if (result.status === "needs_first_factor") {
         // Email link / OTP verification needed
         setVerifying(true);
+        toast.success("Verification code sent to your email.");
       } else {
         setError("Sign in could not complete. Please try again.");
+        toast.error("Sign in could not complete. Please try again.");
       }
     } catch (err: unknown) {
       const clerkError = err as { errors?: { message: string }[] };
-      setError(clerkError?.errors?.[0]?.message ?? "Invalid email or password.");
+      const message = clerkError?.errors?.[0]?.message ?? "Invalid email or password.";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -75,11 +81,14 @@ export default function LoginPage() {
         code,
       });
       if (result.status === "complete") {
+        toast.success("Verification successful.");
         router.push("/onboarding");
       }
     } catch (err: unknown) {
       const clerkError = err as { errors?: { message: string }[] };
-      setError(clerkError?.errors?.[0]?.message ?? "Invalid code.");
+      const message = clerkError?.errors?.[0]?.message ?? "Invalid code.";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -97,6 +106,7 @@ export default function LoginPage() {
     } catch {
       setGoogleLoading(false);
       setError("Google sign-in failed. Please try email instead.");
+      toast.error("Google sign-in failed. Please try email instead.");
     }
   }
 

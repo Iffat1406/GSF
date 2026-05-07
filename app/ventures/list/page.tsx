@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Lightbulb, Building2, TrendingUp, Users, Globe, Link2, ChevronRight,
   ChevronLeft, CheckCircle2, Rocket, Briefcase, Plus, X, ArrowRight
@@ -62,9 +63,18 @@ export default function ListVenturePage() {
 
   const addCustomTag = () => {
     const t = customTag.trim();
-    if (t && !form.lookingFor.includes(t)) {
-      setForm(prev => ({ ...prev, lookingFor: [...prev.lookingFor, t] }));
+    if (!t) {
+      toast.error("Enter a tag before adding a custom need.");
+      return;
     }
+
+    if (form.lookingFor.includes(t)) {
+      toast.error("That custom need is already selected.");
+      setCustomTag("");
+      return;
+    }
+
+    setForm(prev => ({ ...prev, lookingFor: [...prev.lookingFor, t] }));
     setCustomTag("");
   };
 
@@ -76,18 +86,23 @@ export default function ListVenturePage() {
   };
 
   const handleSubmit = () => {
-    // Save to localStorage so ventures page can pick it up
-    const existing = JSON.parse(localStorage.getItem("gsf_user_ventures") || "[]");
-    const newVenture = {
-      ...form,
-      id: Date.now(),
-      avatar: form.name.slice(0, 2).toUpperCase(),
-      avatarBg: "#5B6CFF",
-      founder: "You",
-      submittedAt: new Date().toISOString(),
-    };
-    localStorage.setItem("gsf_user_ventures", JSON.stringify([...existing, newVenture]));
-    setSubmitted(true);
+    try {
+      // Save to localStorage so ventures page can pick it up
+      const existing = JSON.parse(localStorage.getItem("gsf_user_ventures") || "[]");
+      const newVenture = {
+        ...form,
+        id: Date.now(),
+        avatar: form.name.slice(0, 2).toUpperCase(),
+        avatarBg: "#5B6CFF",
+        founder: "You",
+        submittedAt: new Date().toISOString(),
+      };
+      localStorage.setItem("gsf_user_ventures", JSON.stringify([...existing, newVenture]));
+      toast.success("Venture listed successfully!");
+      setSubmitted(true);
+    } catch {
+      toast.error("Something went wrong while listing your venture.");
+    }
   };
 
   if (submitted) {

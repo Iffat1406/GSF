@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import {
   Lightbulb,
   User,
@@ -53,6 +54,7 @@ export default function IdeaPage() {
 
   function handleSave() {
     setSaved(true);
+    toast.success("Progress saved successfully!");
     setTimeout(() => setSaved(false), 2000);
   }
 
@@ -213,7 +215,7 @@ export default function IdeaPage() {
                       <input className="input" placeholder={`Enter ${field.toLowerCase()}...`} />
                     </div>
                   ))}
-                  <Button variant="primary" size="md" className="w-full mt-2">
+                  <Button variant="primary" size="md" className="w-full mt-2" onClick={() => toast.success("Persona saved successfully!")}>
                     Save Persona
                   </Button>
                 </div>
@@ -313,7 +315,7 @@ export default function IdeaPage() {
                       <option>Sunita Rao — EdTech</option>
                     </select>
                   </div>
-                  <Button variant="primary" size="lg" rightIcon={<Send className="size-4" />}>
+                  <Button variant="primary" size="lg" rightIcon={<Send className="size-4" />} onClick={() => toast.success("Feedback request submitted!")}>
                     Submit for Review
                   </Button>
                 </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { ExpertProfile } from "@/lib/schema";
+import { toast } from "sonner";
 
 export function useExpertProfile() {
   const [profile,  setProfile]  = useState<ExpertProfile | null>(null);
@@ -17,7 +18,9 @@ export function useExpertProfile() {
       const data = await res.json();
       setProfile(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error");
+      const message = err instanceof Error ? err.message : "Error";
+      setError(message);
+      toast.error("We couldn't load your expert profile right now.");
     } finally {
       setLoading(false);
     }

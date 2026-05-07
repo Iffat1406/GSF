@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 
 export interface ProfileData {
   id:         string;
@@ -32,7 +33,9 @@ export function useProfile() {
       const data = await res.json();
       setProfile(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error");
+      const message = err instanceof Error ? err.message : "Error";
+      setError(message);
+      toast.error("We couldn't load your profile right now.");
     } finally {
       setLoading(false);
     }

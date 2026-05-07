@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { Rocket, Star, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 
 type Role = "founder" | "expert";
 
@@ -48,11 +49,13 @@ export default function OnboardingPage() {
       await session?.touch();
 
       setDone(true);
+      toast.success("Onboarding complete. Taking you to your dashboard.");
       setTimeout(() => {
         router.push(role === "expert" ? "/expert-dashboard" : "/dashboard");
       }, 1200);
     } catch {
       setSaving(false);
+      toast.error("Something went wrong while completing onboarding.");
     }
   }
 

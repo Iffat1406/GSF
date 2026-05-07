@@ -8,6 +8,7 @@ import { useExpertProfile } from "@/lib/hooks/useExpertProfile";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { Edit3, Save, Mail, Globe, Link2, MapPin, Camera, Star, Award, Briefcase } from "lucide-react";
+import { toast } from "sonner";
 
 const DOMAINS_ALL = ["HealthTech","FinTech","EdTech","Product","Growth","Legal","AgriTech","ClimaTech","SaaS","DeepTech","Fundraising"];
 
@@ -85,7 +86,10 @@ export default function ExpertProfilePage() {
     if (ok1 && ok2) {
       setSaved(true);
       setEditing(false);
+      toast.success("Expert profile saved successfully!");
       setTimeout(() => setSaved(false), 2500);
+    } else {
+      toast.error("Something went wrong while saving your expert profile.");
     }
   }
 
@@ -95,9 +99,11 @@ export default function ExpertProfilePage() {
     setUploadingPhoto(true);
     try {
       await clerkUser.setProfileImage({ file });
+      toast.success("Profile photo updated.");
       // clerkUser.imageUrl updates automatically via useUser() — no refetch needed
     } catch (err) {
       console.error("Photo upload failed:", err);
+      toast.error("Something went wrong while uploading your photo.");
     } finally {
       setUploadingPhoto(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

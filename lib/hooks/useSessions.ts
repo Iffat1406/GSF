@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { Session } from "@/lib/schema";
+import { toast } from "sonner";
 
 export function useSessions() {
   const [sessions,  setSessions]  = useState<Session[]>([]);
@@ -16,7 +17,9 @@ export function useSessions() {
       const data = await res.json();
       setSessions(data ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error");
+      const message = err instanceof Error ? err.message : "Error";
+      setError(message);
+      toast.error("We couldn't load your sessions right now.");
     } finally {
       setLoading(false);
     }

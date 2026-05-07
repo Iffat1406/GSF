@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Search, Star, Video, ChevronDown, Clock, Award } from "lucide-react";
+import { toast } from "sonner";
 
 const EXPERTS = [
   { id: 1, name: "Meera Patel",     avatar: "MP", domain: "HealthTech", role: "ex-YC Founder, S21",       exp: "5+ yrs",  rate: 100, rating: 4.9, reviews: 38, tags: ["MVP", "Fundraising", "GTM"],          available: true,  bg: "#EF4444" },
@@ -40,7 +41,11 @@ export default function ExpertsPage() {
 
   function handleBook(id: number) {
     setBooking(id);
-    setTimeout(() => { setBooked(prev => [...prev, id]); setBooking(null); }, 1200);
+    setTimeout(() => {
+      setBooked(prev => [...prev, id]);
+      setBooking(null);
+      toast.success("Booking confirmed!");
+    }, 1200);
   }
 
   return (
@@ -158,7 +163,14 @@ export default function ExpertsPage() {
                       <span className="text-xs text-emerald-500 font-semibold flex-shrink-0">✓ Booked!</span>
                     ) : (
                       <button
-                        onClick={() => expert.available && handleBook(expert.id)}
+                        onClick={() => {
+                          if (!expert.available) {
+                            toast.error("This expert is unavailable right now.");
+                            return;
+                          }
+
+                          handleBook(expert.id);
+                        }}
                         disabled={!expert.available || isBooking}
                         className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1 flex-shrink-0 whitespace-nowrap"
                         style={!expert.available ? { opacity: 0.5, cursor: "not-allowed" } : {}}

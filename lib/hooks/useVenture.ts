@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { Venture } from "@/lib/schema";
+import { toast } from "sonner";
 
 export function useVenture() {
   const [venture,  setVenture]  = useState<Venture | null>(null);
@@ -17,7 +18,9 @@ export function useVenture() {
       const data = await res.json();
       setVenture(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error");
+      const message = err instanceof Error ? err.message : "Error";
+      setError(message);
+      toast.error("We couldn't load your venture right now.");
     } finally {
       setLoading(false);
     }
