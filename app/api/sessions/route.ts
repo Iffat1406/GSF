@@ -7,6 +7,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sessions } from "@/lib/schema";
 import { eq, or, desc } from "drizzle-orm";
+import { users, notifications } from "@/lib/schema";
+import { sendEmail } from "@/lib/email";
 import {
   deductCredits,
   InsufficientCreditsError,
@@ -127,6 +129,46 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
+
+  // ── Send confirmation emails (non-blocking)
+  (async () => {
+    try {
+      const [founder] = await db.select().from(users).where(eq(users.clerkId, userId)).limit(1);
+      const [expert] = await db.select().from(users).where(eq(users.clerkId, expertClerkId)).limit(1);
+
+      const meetingUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ""}${created.meetingUrl || `/session-room/${created.id}`}`;
+
+      const subject = "Your session is booked";
+      const text = `Your session with ${created.expertName || "an expert"} is scheduled at ${new Date(created.scheduledAt).toLocaleString()}. Join: ${meetingUrl}`;
+
+      if (founder?.email) {
+        await sendEmail({ to: founder.email, subject, text });
+        await db.insert(notifications).values({
+          sessionId: created.id,
+          toEmail: founder.email,
+          type: "booking_confirmation",
+          status: "sent",
+          payload: { role: "founder" },
+          sentAt: new Date(),
+        }).catch(() => {});
+      }
+
+      if (expert?.email) {
+        await sendEmail({ to: expert.email, subject: `New session booked by ${created.founderName || "a founder"}`, text });
+        await db.insert(notifications).values({
+          sessionId: created.id,
+          toEmail: expert.email,
+          type: "booking_confirmation",
+          status: "sent",
+          payload: { role: "expert" },
+          sentAt: new Date(),
+        }).catch(() => {});
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("Email send failed", e);
+    }
+  })();
 
   return NextResponse.json(created, { status: 201 });
 }

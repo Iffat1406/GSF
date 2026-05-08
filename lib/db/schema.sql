@@ -56,6 +56,23 @@ CREATE TABLE availability_slots (
 );
 
 -- ============================================================
+-- NOTIFICATIONS TABLE (email log)
+-- ============================================================
+
+CREATE TABLE notifications (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id    UUID,
+  to_email      VARCHAR(255) NOT NULL,
+  type          VARCHAR(100) NOT NULL, -- booking_confirmation | reminder | recording_ready
+  status        VARCHAR(50) NOT NULL DEFAULT 'pending',
+  payload       JSONB DEFAULT '{}',
+  sent_at       TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_notifications_session ON notifications(session_id);
+
+-- ============================================================
 -- COHORTS TABLE
 -- ============================================================
 

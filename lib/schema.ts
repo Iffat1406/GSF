@@ -130,6 +130,20 @@ export const sessions = pgTable("sessions", {
 });
 
 // ===================================================
+// NOTIFICATIONS (email log)
+// ===================================================
+export const notifications = pgTable("notifications", {
+  id:          uuid("id").defaultRandom().primaryKey(),
+  sessionId:   uuid("session_id"),
+  toEmail:     text("to_email").notNull(),
+  type:        text("type").notNull(), // booking_confirmation | reminder | recording_ready
+  status:      text("status").notNull().default("pending"),
+  payload:     jsonb("payload").$type<any>().default({}),
+  sentAt:      timestamp("sent_at"),
+  createdAt:   timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
 // CREDIT TRANSACTIONS
 // ===================================================
 export const creditTransactions = pgTable("credit_transactions", {
@@ -183,3 +197,4 @@ export type NewCreditTransaction = typeof creditTransactions.$inferInsert;
 export type InvestmentInterest   = typeof investmentInterests.$inferSelect;
 export type NewInvestmentInterest= typeof investmentInterests.$inferInsert;
 export type CreditBalance        = typeof creditBalances.$inferSelect;
+export type Notification         = typeof notifications.$inferSelect;
