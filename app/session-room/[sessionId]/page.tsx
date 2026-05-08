@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Camera, CirclePlay, Video } from "lucide-react";
+import { ArrowLeft, Camera, CirclePlay, Video, Star } from "lucide-react";
+import { toast } from "sonner";
 
 type SessionData = {
   id: string;
@@ -20,6 +21,9 @@ export default function SessionRoomPage() {
   const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [recording, setRecording] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [feedback, setFeedback] = useState("");
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
   useEffect(() => {
     async function loadSession() {
@@ -39,6 +43,40 @@ export default function SessionRoomPage() {
     if (params.sessionId) loadSession();
   }, [params.sessionId]);
 
+  async function handleSubmitFeedback(e: React.FormEvent) {
+    e.preventDefault();
+    if (rating === 0) {
+      toast.error("Please select a rating");
+      return;
+    }
+
+    setSubmittingFeedback(true);
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: params.sessionId,
+          rating,
+          feedback,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to submit feedback");
+      }
+
+      toast.success("Feedback submitted! Thank you for reviewing.");
+      setRating(0);
+      setFeedback("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to submit feedback");
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  }
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-[#4A5668]">Loading session room…</div>;
   }
@@ -49,7 +87,7 @@ export default function SessionRoomPage() {
 
   return (
     <main className="min-h-screen bg-[#FDFAF7] px-4 py-8">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto space-y-6">
         <Link href="/connect" className="inline-flex items-center gap-2 text-sm text-[#4A5668] mb-6 hover:text-[#1A2332]">
           <ArrowLeft className="size-3.5" /> Back to Connect
         </Link>
@@ -92,6 +130,60 @@ export default function SessionRoomPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Feedback form */}
+        <div className="card p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-[#1A2332]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Share feedback
+          </h2>
+          <p className="text-sm text-[#4A5668]">
+            Help us improve by rating your experience with {session.expertName}.
+          </p>
+          <form onSubmit={handleSubmitFeedback} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-[#1A2332] mb-2">Rating</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className="transition-all"
+                  >
+                    <Star
+                      className={`size-6 ${
+                        star <= rating
+                          ? "fill-[#81A6C6] text-[#81A6C6]"
+                          : "text-[#D2C4B4]"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#1A2332] mb-2">
+                Feedback (optional)
+              </label>
+              <textarea
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                placeholder="Tell us about your session experience..."
+                rows={4}
+                className="w-full rounded-lg border border-[#D2C4B4] bg-white px-3 py-2 text-sm text-[#1A2332] placeholder-[#4A5668] focus:outline-none focus:ring-2 focus:ring-[#81A6C6]"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={submittingFeedback}
+              className="btn-primary w-full py-2 text-sm"
+            >
+              {submittingFeedback ? "Submitting..." : "Submit feedback"}
+            </button>
+          </form>
         </div>
       </div>
     </main>

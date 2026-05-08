@@ -73,6 +73,23 @@ CREATE TABLE notifications (
 CREATE INDEX idx_notifications_session ON notifications(session_id);
 
 -- ============================================================
+-- SESSION FEEDBACK TABLE (ratings & reviews)
+-- ============================================================
+
+CREATE TABLE session_feedback (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id        UUID NOT NULL,
+  founder_clerk_id  VARCHAR(255) NOT NULL,
+  expert_clerk_id   VARCHAR(255) NOT NULL,
+  rating            INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  feedback          TEXT,
+  created_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_session_feedback_session ON session_feedback(session_id);
+CREATE INDEX idx_session_feedback_expert ON session_feedback(expert_clerk_id);
+
+-- ============================================================
 -- COHORTS TABLE
 -- ============================================================
 

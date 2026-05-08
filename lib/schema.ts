@@ -180,6 +180,19 @@ export const creditBalances = pgTable("credit_balances", {
 });
 
 // ===================================================
+// SESSION FEEDBACK (ratings & reviews)
+// ===================================================
+export const sessionFeedback = pgTable("session_feedback", {
+  id:            uuid("id").defaultRandom().primaryKey(),
+  sessionId:     uuid("session_id").notNull(),
+  founderClerkId: text("founder_clerk_id").notNull(),
+  expertClerkId:  text("expert_clerk_id").notNull(),
+  rating:        integer("rating").notNull(), // 1-5
+  feedback:      text("feedback").default(""),
+  createdAt:     timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
 // TYPE EXPORTS
 // ===================================================
 export type User                 = typeof users.$inferSelect;
@@ -198,3 +211,4 @@ export type InvestmentInterest   = typeof investmentInterests.$inferSelect;
 export type NewInvestmentInterest= typeof investmentInterests.$inferInsert;
 export type CreditBalance        = typeof creditBalances.$inferSelect;
 export type Notification         = typeof notifications.$inferSelect;
+export type SessionFeedback      = typeof sessionFeedback.$inferSelect;
