@@ -247,13 +247,13 @@ export default function VenturesPage() {
                             {v.initials || "FN"}
                           </div>
                           <div>
-                            <p className="text-xs text-[#8A95A3]">by {v.founderName || v.founder || "Unknown Founder"}</p>
-                            <span className={`badge mt-1 text-[10px] ${v.fundingStage === "Seed" ? "badge-blue" : "badge-warm"}`}>{v.fundingStage || "Pre-seed"}</span>
                             <h2 className="font-bold text-[#1A2332] dark:text-slate-100 text-base">{v.name}</h2>
+                            <p className="text-xs text-[#8A95A3] dark:text-slate-400">by {v.founderName || v.founder || "Unknown Founder"}</p>
+                            <span className={`badge mt-1 text-[10px] ${v.fundingStage === "Seed" ? "badge-blue" : "badge-warm"}`}>{v.fundingStage || "Pre-seed"}</span>
                           </div>
                         </div>
-                        <span className={`text-xs px-2 py-1 rounded-full shrink-0 font-medium ${v.daysLeft <= 7 ? 'text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-300 border border-red-100 dark:border-red-500/20' : 'text-[#8A95A3] dark:text-slate-400 bg-[#F3E3D0] dark:bg-slate-700 border border-[#D2C4B4] dark:border-slate-600'}`}>
-                          {v.daysLeft}d left
+                        <span className={`text-xs px-2 py-1 rounded-full shrink-0 font-medium ${(v.daysLeft || 0) <= 7 ? 'text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-300 border border-red-100 dark:border-red-500/20' : 'text-[#8A95A3] dark:text-slate-400 bg-[#F3E3D0] dark:bg-slate-700 border border-[#D2C4B4] dark:border-slate-600'}`}>
+                          {v.daysLeft || 0}d left
                         </span>
                       </div>
 
