@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { Lightbulb, TrendingUp, MessageSquare, Shield, Percent, Eye, Heart, Search, ArrowRight, SlidersHorizontal, BarChart2, Rocket, DollarSign, Building2, BookOpen, Loader2 } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
+import SkeletonCard from "@/components/ui/SkeletonCard";
 
 const AVATAR_COLORS = [
   { bg: "#DBEAFE", text: "#1E40AF" },
@@ -50,7 +51,6 @@ export default function VenturesPage() {
   const [sectorFilter, setSectorFilter] = useState("All sectors");
   const [fundingFilter, setFundingFilter] = useState("All");
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [ventures, setVentures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [fundingActionStatus, setFundingActionStatus] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
@@ -84,7 +84,6 @@ export default function VenturesPage() {
       });
       if (res.ok) {
         setFundingActionStatus(prev => ({ ...prev, [ventureId]: 'success' }));
-        // optimistic update
         setVentures(prev => prev.map(v => v.id === ventureId ? { ...v, interested: (v.interested || 0) + 1 } : v));
         alert("Success! Your interest has been sent to the founder.");
       } else {
@@ -111,9 +110,8 @@ export default function VenturesPage() {
       safeName.toLowerCase().includes(search.toLowerCase()) ||
       safeFounder.toLowerCase().includes(search.toLowerCase()) ||
       safeTagline.toLowerCase().includes(search.toLowerCase()) ||
-      safeTags.some((t: string) => t.toLowerCase().includes(search.toLowerCase()));
+      safeTags.some(t => t.toLowerCase().includes(search.toLowerCase()));
       
-    // Note: Drizzle stage maps to ideaStage in UI
     const matchIdea = ideaStageFilter === "All stages" || v.stage === ideaStageFilter;
     const matchSector = sectorFilter === "All sectors" || v.sector === sectorFilter;
     const matchFunding = fundingFilter === "All" || v.fundingStage === fundingFilter;
@@ -226,7 +224,13 @@ export default function VenturesPage() {
               )}
             </p>
 
-            {filtered.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
               <EmptyState
                 icon="🚀"
                 title="No ventures found"
@@ -238,7 +242,7 @@ export default function VenturesPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {filtered.map((v) => {
                   const stageStyle = STAGE_STYLES[v.stage] || STAGE_STYLES["Ideation"];
-                  const avatarColor = v.avatarColor || AVATAR_COLORS[0];
+                  const avatarColor = AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
                   return (
                     <div key={v.id} className="card card-hover p-6 flex flex-col gap-4 bg-white dark:bg-slate-800">
                       {/* Header */}
@@ -246,7 +250,7 @@ export default function VenturesPage() {
                         <div className="flex items-center gap-3">
                           <div className="size-12 rounded-full border-2 border-[#D2C4B4] flex items-center justify-center text-sm font-bold shrink-0"
                             style={{ background: avatarColor.bg, color: avatarColor.text }}>
-                            {v.initials || "FN"}
+                            {v.initials || v.name?.charAt(0) || "V"}
                           </div>
                           <div>
                             <h2 className="font-bold text-[#1A2332] dark:text-slate-100 text-base">{v.name}</h2>
@@ -255,14 +259,14 @@ export default function VenturesPage() {
                           </div>
                         </div>
                         <span className={`text-xs px-2 py-1 rounded-full shrink-0 font-medium ${v.daysLeft <= 7 ? 'text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-300 border border-red-100 dark:border-red-500/20' : 'text-[#8A95A3] dark:text-slate-400 bg-[#F3E3D0] dark:bg-slate-700 border border-[#D2C4B4] dark:border-slate-600'}`}>
-                          {v.daysLeft || 0}d left
+                          {v.daysLeft || 30}d left
                         </span>
                       </div>
 
                       <p className="text-sm font-semibold text-[#1A2332] dark:text-slate-100 leading-snug">{v.tagline}</p>
-                      <p className="text-sm text-[#4A5668] leading-relaxed">{v.description}</p>
+                      <p className="text-sm text-[#4A5668] dark:text-slate-300 leading-relaxed">{v.description}</p>
 
-                      {/* Idea Stage — above equity */}
+                      {/* Idea Stage */}
                       <div className="flex items-center gap-2.5">
                         <span className="text-[10px] font-semibold uppercase tracking-wider text-[#8A95A3]">Idea Stage</span>
                         <span

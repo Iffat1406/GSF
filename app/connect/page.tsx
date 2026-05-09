@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Video, MessageSquare, Calendar, Search, Star, Clock, ArrowRight, Shield, Zap, Filter } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
+import SkeletonCard from "@/components/ui/SkeletonCard";
 
 const EXPERTS = [
   { name: "Dr. Anika Patel",      initials: "AP", role: "Partner",               company: "Sequoia Capital India",  domain: "Fundraising & VC",     rating: 4.9, sessions: 48,  available: true,  tags: ["Fundraising", "SaaS", "EdTech"],        bg: "#EF4444" },
@@ -46,30 +47,18 @@ const HOW_IT_WORKS = [
 ];
 
 export default function ConnectPage() {
-  const router = useRouter();
-  const { isSignedIn, user } = useUser();
   const [search, setSearch]       = useState("");
   const [domain, setDomain]       = useState("All domains");
   const [availOnly, setAvailOnly] = useState(false);
-  const [liveSlots, setLiveSlots] = useState<Array<{
-    id: string;
-    expertClerkId: string;
-    expertName: string;
-    startAt: string;
-    endAt: string;
-    timezone?: string;
-    notes?: string;
-    isBooked?: boolean;
-  }>>([]);
-  const [loadingSlots, setLoadingSlots] = useState(true);
-  const [bookingSlotId, setBookingSlotId] = useState<string | null>(null);
-  const [recentSession, setRecentSession] = useState<null | {
-    id: string;
-    meetingUrl?: string;
-    recordingUrl?: string;
-    expertName?: string;
-    scheduledAt?: string;
-  }>(null);
+  const [loading, setLoading] = useState(true);
+  
+  const router = useRouter();
+  const { isSignedIn } = useUser();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -83,75 +72,13 @@ export default function ConnectPage() {
     });
   }, [search, domain, availOnly]);
 
-  useEffect(() => {
-    async function loadSlots() {
-      try {
-        setLoadingSlots(true);
-        const res = await fetch("/api/expert-availability");
-        if (!res.ok) throw new Error("Failed to load slots");
-        const data = await res.json();
-        setLiveSlots(data);
-      } catch {
-        setLiveSlots([]);
-      } finally {
-        setLoadingSlots(false);
-      }
-    }
-
-    loadSlots();
-  }, []);
-
-  async function handleBookSlot(slot: (typeof liveSlots)[number]) {
+  const handleBookCall = (expert: typeof EXPERTS[0]) => {
     if (!isSignedIn) {
-      router.push("/sign-up");
+      router.push(`/sign-up?redirect=/connect?expert=${encodeURIComponent(expert.name)}`);
       return;
     }
-
-    if (!user) return;
-
-    setBookingSlotId(slot.id);
-    try {
-      const founderName = user.fullName || [user.firstName, user.lastName].filter(Boolean).join(" ") || "GSF Founder";
-      const duration = Math.max(30, Math.round((new Date(slot.endAt).getTime() - new Date(slot.startAt).getTime()) / 60000));
-
-      const sessionRes = await fetch("/api/sessions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          expertClerkId: slot.expertClerkId,
-          founderName,
-          expertName: slot.expertName,
-          ventureName: "GSF Venture",
-          scheduledAt: slot.startAt,
-          duration,
-          creditsCost: 100,
-          creditsEarned: 80,
-        }),
-      });
-
-      if (!sessionRes.ok) throw new Error("Failed to create session");
-      const session = await sessionRes.json();
-
-      const slotRes = await fetch("/api/expert-availability", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotId: slot.id, sessionId: session.id }),
-      });
-
-      if (!slotRes.ok) throw new Error("Failed to reserve slot");
-
-      setLiveSlots(prev => prev.map(item => item.id === slot.id ? { ...item, isBooked: true } : item));
-      setRecentSession(session);
-      alert("Session booked successfully.");
-    } catch (error) {
-      console.error("Booking failed:", error);
-      alert("Booking failed. Please try again.");
-    } finally {
-      setBookingSlotId(null);
-    }
-  }
-
-  const openSlots = liveSlots.filter(slot => !slot.isBooked);
+    router.push(`/booking?expert=${encodeURIComponent(expert.name)}`);
+  };
 
   return (
     <>
@@ -182,89 +109,6 @@ export default function ConnectPage() {
             </div>
           </div>
         </section>
-
-        {/* Live availability */}
-        <section className="section-container py-14">
-          <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
-            <div>
-              <h2 className="text-2xl text-[#1A2332] mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Live availability calendar
-              </h2>
-              <p className="text-sm text-[#4A5668]">Pick a slot, book it, and the session is created immediately.</p>
-            </div>
-            <span className="badge badge-blue text-xs">
-              <Calendar className="size-3.5" /> {openSlots.length} slots open
-            </span>
-          </div>
-
-          {loadingSlots ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3].map(n => <div key={n} className="card p-5 h-32 animate-pulse" />)}
-            </div>
-          ) : openSlots.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {openSlots.slice(0, 6).map(slot => (
-                <div key={slot.id} className="card p-5 flex flex-col gap-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-[#1A2332]">{slot.expertName}</p>
-                      <p className="text-xs text-[#4A5668]">
-                        {new Date(slot.startAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                      </p>
-                    </div>
-                    <span className="badge badge-teal text-[10px]">Available</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-[#4A5668]">
-                    <Clock className="size-3.5" />
-                    {new Date(slot.startAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-                    <span className="text-[#8A95A3]">to</span>
-                    {new Date(slot.endAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-                  </div>
-                  {slot.notes && <p className="text-xs text-[#8A95A3]">{slot.notes}</p>}
-                  <button
-                    onClick={() => handleBookSlot(slot)}
-                    disabled={bookingSlotId === slot.id}
-                    className="btn-primary text-sm py-2 px-4 justify-center"
-                  >
-                    <Video className="size-3.5" />
-                    {bookingSlotId === slot.id ? "Booking…" : isSignedIn ? "Book this slot" : "Sign up to book"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="card p-6 text-sm text-[#4A5668]">
-              No live slots yet. An expert can publish their availability from the expert dashboard.
-            </div>
-          )}
-        </section>
-
-        {recentSession && (
-          <section className="section-container pb-6">
-            <div className="card p-5 flex flex-col sm:flex-row sm:items-center gap-4 border-[#81A6C6]">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-[#1A2332] mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  Session booked successfully
-                </h3>
-                <p className="text-sm text-[#4A5668]">
-                  Your live room and recording links are ready for {recentSession.expertName || "this session"}.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {recentSession.meetingUrl && (
-                  <Link href={recentSession.meetingUrl} className="btn-primary text-sm py-2 px-4">
-                    <Video className="size-3.5" /> Join meeting
-                  </Link>
-                )}
-                {recentSession.recordingUrl && (
-                  <Link href={recentSession.recordingUrl} className="btn-outline text-sm py-2 px-4">
-                    <Clock className="size-3.5" /> Recording
-                  </Link>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* How it works */}
         <section className="section-container pb-20">
@@ -327,52 +171,14 @@ export default function ConnectPage() {
               </div>
             </div>
 
-            {/* Expert grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filtered.map((expert) => (
-                <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4 bg-slate-900 border-slate-800">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="size-12 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                        style={{ background: `linear-gradient(135deg, ${expert.bg}, ${expert.bg}bb)` }}>
-                        {expert.initials}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-slate-100 text-sm">{expert.name}</h3>
-                        <p className="text-xs text-slate-300">{expert.role}</p>
-                        <p className="text-xs font-semibold text-blue-300 mt-0.5">{expert.company}</p>
-                        <span className="badge badge-blue mt-1 text-[10px]">{expert.domain}</span>
-                      </div>
-                    </div>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${expert.available ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}`}>
-                      {expert.available ? "● Available" : "Busy"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs text-slate-400">
-                    <span className="flex items-center gap-1"><Star className="size-3 text-amber-400 fill-amber-400" />{expert.rating}</span>
-                    <span className="flex items-center gap-1"><Clock className="size-3" />{expert.sessions} sessions</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {expert.tags.map((tag) => (
-                      <span key={tag} className="text-xs text-slate-300 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">{tag}</span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
-                    <Link href="/sign-up" className="flex-1 btn-primary py-2 text-sm justify-center">
-                      <Video className="size-3.5" /> Book Call
-                    </Link>
-                    <Link href="/sign-up" className="btn-outline py-2 px-3" title="Chat">
-                      <MessageSquare className="size-4" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {filtered.length === 0 && (
+            {/* Expert grid with Loading Skeleton */}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
               <EmptyState
                 icon="📅"
                 title="No experts found"
@@ -380,7 +186,51 @@ export default function ConnectPage() {
                 primaryAction={{ label: "Browse All Experts", href: "/experts" }}
                 secondaryAction={{ label: "Join GSF", href: "/sign-up" }}
               />
-)}
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filtered.map((expert) => (
+                  <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4 bg-slate-900 border-slate-800">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="size-12 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                          style={{ background: `linear-gradient(135deg, ${expert.bg}, ${expert.bg}bb)` }}>
+                          {expert.initials}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-100 text-sm">{expert.name}</h3>
+                          <p className="text-xs text-slate-300">{expert.role}</p>
+                          <p className="text-xs font-semibold text-blue-300 mt-0.5">{expert.company}</p>
+                          <span className="badge badge-blue mt-1 text-[10px]">{expert.domain}</span>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${expert.available ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}`}>
+                        {expert.available ? "● Available" : "Busy"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs text-slate-400">
+                      <span className="flex items-center gap-1"><Star className="size-3 text-amber-400 fill-amber-400" />{expert.rating}</span>
+                      <span className="flex items-center gap-1"><Clock className="size-3" />{expert.sessions} sessions</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {expert.tags.map((tag) => (
+                        <span key={tag} className="text-xs text-slate-300 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">{tag}</span>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
+                      <button onClick={() => handleBookCall(expert)} className="flex-1 btn-primary py-2 text-sm justify-center">
+                        <Video className="size-3.5" /> Book Call
+                      </button>
+                      <Link href="/sign-up" className="btn-outline py-2 px-3" title="Chat">
+                        <MessageSquare className="size-4" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
