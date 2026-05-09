@@ -65,7 +65,6 @@ export default function RootLayout({
         <body className="min-h-full font-sans" style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}>
           <ThemeProvider>
             <PageTransition>
-              <Navbar />
               <Breadcrumb />
               <ToastProvider />
               <ClientLayout>{children}</ClientLayout>

@@ -30,10 +30,10 @@ export default function Breadcrumb() {
   if (segments.length === 0) return null;
 
   return (
-    <nav className="py-3 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">
-      <ol className="flex items-center flex-wrap gap-1 text-sm">
+    <nav className="py-2.5 px-4 sm:px-6 lg:px-8 bg-background border-b border-border transition-all duration-300">
+      <ol className="flex items-center flex-wrap gap-1 text-xs sm:text-sm">
         <li>
-          <Link href="/" className="text-gray-500 hover:text-blue-600 dark:text-slate-400">
+          <Link href="/" className="text-text-muted hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
             Home
           </Link>
         </li>
@@ -45,13 +45,13 @@ export default function Breadcrumb() {
 
           return (
             <li key={href} className="flex items-center gap-1">
-              <span className="text-gray-400">/</span>
+              <span className="text-text-muted/50 select-none">/</span>
               {isLast ? (
-                <span className="text-gray-700 dark:text-slate-200 font-medium">
+                <span className="text-text-primary font-medium">
                   {displayName}
                 </span>
               ) : (
-                <Link href={href} className="text-gray-500 hover:text-blue-600 dark:text-slate-400">
+                <Link href={href} className="text-text-muted hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
                   {displayName}
                 </Link>
               )}
