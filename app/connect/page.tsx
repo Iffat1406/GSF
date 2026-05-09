@@ -3,10 +3,12 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { Video, MessageSquare, Calendar, Search, Star, Clock, ArrowRight, Shield, Zap, Filter } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
-import { cn } from "@/lib/utils";
+import SkeletonCard from "@/components/ui/SkeletonCard";
 
 const EXPERTS = [
   { name: "Dr. Anika Patel",      initials: "AP", role: "Partner",               company: "Sequoia Capital India",  domain: "Fundraising & VC",     rating: 4.9, sessions: 48,  available: true,  tags: ["Fundraising", "SaaS", "EdTech"],        bg: "#EF4444" },
@@ -48,6 +50,15 @@ export default function ConnectPage() {
   const [search, setSearch]       = useState("");
   const [domain, setDomain]       = useState("All domains");
   const [availOnly, setAvailOnly] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  const router = useRouter();
+  const { isSignedIn } = useUser();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -60,6 +71,14 @@ export default function ConnectPage() {
       return matchSearch && matchDomain && matchAvail;
     });
   }, [search, domain, availOnly]);
+
+  const handleBookCall = (expert: typeof EXPERTS[0]) => {
+    if (!isSignedIn) {
+      router.push(`/sign-up?redirect=/connect?expert=${encodeURIComponent(expert.name)}`);
+      return;
+    }
+    router.push(`/booking?expert=${encodeURIComponent(expert.name)}`);
+  };
 
   return (
     <>
@@ -152,52 +171,14 @@ export default function ConnectPage() {
               </div>
             </div>
 
-            {/* Expert grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filtered.map((expert) => (
-                <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4 bg-slate-900 border-slate-800">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="size-12 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                        style={{ background: `linear-gradient(135deg, ${expert.bg}, ${expert.bg}bb)` }}>
-                        {expert.initials}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-slate-100 text-sm">{expert.name}</h3>
-                        <p className="text-xs text-slate-300">{expert.role}</p>
-                        <p className="text-xs font-semibold text-blue-300 mt-0.5">{expert.company}</p>
-                        <span className="badge badge-blue mt-1 text-[10px]">{expert.domain}</span>
-                      </div>
-                    </div>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${expert.available ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}`}>
-                      {expert.available ? "● Available" : "Busy"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs text-slate-400">
-                    <span className="flex items-center gap-1"><Star className="size-3 text-amber-400 fill-amber-400" />{expert.rating}</span>
-                    <span className="flex items-center gap-1"><Clock className="size-3" />{expert.sessions} sessions</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {expert.tags.map((tag) => (
-                      <span key={tag} className="text-xs text-slate-300 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">{tag}</span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
-                    <Link href="/sign-up" className="flex-1 btn-primary py-2 text-sm justify-center">
-                      <Video className="size-3.5" /> Book Call
-                    </Link>
-                    <Link href="/sign-up" className="btn-outline py-2 px-3" title="Chat">
-                      <MessageSquare className="size-4" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {filtered.length === 0 && (
+            {/* Expert grid with Loading Skeleton */}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
               <EmptyState
                 icon="📅"
                 title="No experts found"
@@ -205,7 +186,51 @@ export default function ConnectPage() {
                 primaryAction={{ label: "Browse All Experts", href: "/experts" }}
                 secondaryAction={{ label: "Join GSF", href: "/sign-up" }}
               />
-)}
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filtered.map((expert) => (
+                  <div key={expert.name} className="card p-6 card-hover flex flex-col gap-4 bg-slate-900 border-slate-800">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="size-12 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                          style={{ background: `linear-gradient(135deg, ${expert.bg}, ${expert.bg}bb)` }}>
+                          {expert.initials}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-100 text-sm">{expert.name}</h3>
+                          <p className="text-xs text-slate-300">{expert.role}</p>
+                          <p className="text-xs font-semibold text-blue-300 mt-0.5">{expert.company}</p>
+                          <span className="badge badge-blue mt-1 text-[10px]">{expert.domain}</span>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${expert.available ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-slate-800 text-slate-400 border border-slate-700"}`}>
+                        {expert.available ? "● Available" : "Busy"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs text-slate-400">
+                      <span className="flex items-center gap-1"><Star className="size-3 text-amber-400 fill-amber-400" />{expert.rating}</span>
+                      <span className="flex items-center gap-1"><Clock className="size-3" />{expert.sessions} sessions</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {expert.tags.map((tag) => (
+                        <span key={tag} className="text-xs text-slate-300 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">{tag}</span>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
+                      <button onClick={() => handleBookCall(expert)} className="flex-1 btn-primary py-2 text-sm justify-center">
+                        <Video className="size-3.5" /> Book Call
+                      </button>
+                      <Link href="/sign-up" className="btn-outline py-2 px-3" title="Chat">
+                        <MessageSquare className="size-4" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

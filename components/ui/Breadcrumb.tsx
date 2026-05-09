@@ -2,63 +2,78 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 
 const routeNames: Record<string, string> = {
-  experts: "Experts",
-  ventures: "Ventures",
-  connect: "Connect",
-  community: "Community",
   dashboard: "Dashboard",
-  bookings: "Bookings",
+  "expert-dashboard": "Expert Dashboard",
+  connect: "Connect",
+  ventures: "Ventures",
+  experts: "Experts",
+  community: "Community",
   profile: "Profile",
-  about: "About",
-  careers: "Careers",
-  contact: "Contact",
-  privacy: "Privacy",
-  terms: "Terms",
-  login: "Login",
-  "sign-up": "Sign Up",
-  register: "Register",
-  apply: "Apply",
+  credits: "Credits",
+  students: "Students",
+  sessions: "Sessions",
+  investments: "Investments",
+  venture: "Venture",
+  progress: "Progress",
+  chat: "Chat",
 };
 
 export default function Breadcrumb() {
   const pathname = usePathname();
-  const segments = pathname.split("/").filter(Boolean);
 
-  // Don't show breadcrumb on home page
-  if (segments.length === 0) return null;
+  if (pathname === "/") return null;
+
+  const pathSegments = pathname.split("/").filter(Boolean);
 
   return (
-    <nav className="py-2.5 px-4 sm:px-6 lg:px-8 bg-background border-b border-border transition-all duration-300">
-      <ol className="flex items-center flex-wrap gap-1 text-xs sm:text-sm">
-        <li>
-          <Link href="/" className="text-text-muted hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
-            Home
-          </Link>
-        </li>
+    <div className="relative z-40 mt-20 w-full bg-white px-6 py-1.5 shadow-sm">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-1 text-sm font-medium text-black">
+        <Link href="/" className="text-gray-700 transition hover:text-blue-600">
+          Home
+        </Link>
 
-        {segments.map((segment, index) => {
-          const href = "/" + segments.slice(0, index + 1).join("/");
-          const isLast = index === segments.length - 1;
-          const displayName = routeNames[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
+        {pathSegments.map((segment, index) => {
+          if (!isNaN(Number(segment))) return null;
+
+          const href =
+            "/" + pathSegments.slice(0, index + 1).join("/");
+
+          const isLast = index === pathSegments.length - 1;
+
+          const label =
+            routeNames[segment] ||
+            segment.charAt(0).toUpperCase() +
+              segment.slice(1);
 
           return (
-            <li key={href} className="flex items-center gap-1">
-              <span className="text-text-muted/50 select-none">/</span>
+            <div
+              key={href}
+              className="flex items-center"
+            >
+              <ChevronRight
+                size={16}
+                className="mx-2 text-[#AACDDC]"
+              />
+
               {isLast ? (
-                <span className="text-text-primary font-medium">
-                  {displayName}
+                <span className="font-medium text-[#1A2332]">
+                  {label}
                 </span>
               ) : (
-                <Link href={href} className="text-text-muted hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
-                  {displayName}
+                <Link
+                  href={href}
+                  className="transition hover:text-[#81A6C6]"
+                >
+                  {label}
                 </Link>
               )}
-            </li>
+            </div>
           );
         })}
-      </ol>
-    </nav>
+      </div>
+    </div>
   );
 }
