@@ -209,6 +209,38 @@ export const articles = pgTable("articles", {
 });
 
 // ===================================================
+// CONVERSATIONS TABLE (cross-role messaging)
+// ===================================================
+export const conversations = pgTable("conversations", {
+  id:              uuid("id").defaultRandom().primaryKey(),
+  founderClerkId:  text("founder_clerk_id").notNull(),
+  expertClerkId:   text("expert_clerk_id").notNull(),
+  founderName:     text("founder_name").notNull(),
+  expertName:      text("expert_name").notNull(),
+  founderAvatarUrl: text("founder_avatar_url"),
+  expertAvatarUrl: text("expert_avatar_url"),
+  lastMessage:     text("last_message"),
+  lastMessageBy:   text("last_message_by"),
+  founderUnread:   integer("founder_unread").default(0),
+  expertUnread:    integer("expert_unread").default(0),
+  createdAt:       timestamp("created_at").defaultNow(),
+  updatedAt:       timestamp("updated_at").defaultNow(),
+});
+
+// ===================================================
+// MESSAGES TABLE
+// ===================================================
+export const messages = pgTable("messages", {
+  id:              uuid("id").defaultRandom().primaryKey(),
+  conversationId:  uuid("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  senderClerkId:   text("sender_clerk_id").notNull(),
+  senderName:      text("sender_name").notNull(),
+  body:            text("body").notNull(),
+  readAt:          timestamp("read_at"),
+  createdAt:       timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
 // TYPE EXPORTS
 // ===================================================
 export type User                 = typeof users.$inferSelect;
@@ -230,3 +262,7 @@ export type Notification         = typeof notifications.$inferSelect;
 export type SessionFeedback      = typeof sessionFeedback.$inferSelect;
 export type Article              = typeof articles.$inferSelect;
 export type NewArticle           = typeof articles.$inferInsert;
+export type Conversation         = typeof conversations.$inferSelect;
+export type NewConversation      = typeof conversations.$inferInsert;
+export type Message              = typeof messages.$inferSelect;
+export type NewMessage           = typeof messages.$inferInsert;

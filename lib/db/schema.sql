@@ -258,6 +258,47 @@ CREATE INDEX idx_articles_author ON articles(author_clerk_id);
 CREATE INDEX idx_articles_published ON articles(published_at DESC);
 
 -- ============================================================
+-- CONVERSATIONS TABLE (cross-role messaging)
+-- ============================================================
+
+CREATE TABLE conversations (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  founder_clerk_id VARCHAR(255) NOT NULL,
+  expert_clerk_id VARCHAR(255) NOT NULL,
+  founder_name    VARCHAR(255) NOT NULL,
+  expert_name     VARCHAR(255) NOT NULL,
+  founder_avatar_url TEXT,
+  expert_avatar_url  TEXT,
+  last_message    TEXT,
+  last_message_by VARCHAR(255),
+  founder_unread  INT DEFAULT 0,
+  expert_unread   INT DEFAULT 0,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(founder_clerk_id, expert_clerk_id)
+);
+
+CREATE INDEX idx_conversations_founder ON conversations(founder_clerk_id, updated_at DESC);
+CREATE INDEX idx_conversations_expert ON conversations(expert_clerk_id, updated_at DESC);
+
+-- ============================================================
+-- MESSAGES TABLE
+-- ============================================================
+
+CREATE TABLE messages (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+  sender_clerk_id VARCHAR(255) NOT NULL,
+  sender_name     VARCHAR(255) NOT NULL,
+  body            TEXT NOT NULL,
+  read_at         TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_messages_conversation ON messages(conversation_id, created_at DESC);
+CREATE INDEX idx_messages_sender ON messages(sender_clerk_id);
+
+-- ============================================================
 -- UPDATED_AT TRIGGER
 -- ============================================================
 
@@ -288,4 +329,7 @@ CREATE TRIGGER sessions_updated_at BEFORE UPDATE ON sessions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 CREATE TRIGGER articles_updated_at BEFORE UPDATE ON articles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER conversations_updated_at BEFORE UPDATE ON conversations
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
