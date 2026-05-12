@@ -1,6 +1,6 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { and, desc, eq, gte } from "drizzle-orm";
+import { and, desc, eq, gte, lt, gt } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { availabilitySlots } from "@/lib/schema";
 
@@ -11,6 +11,12 @@ type SlotPayload = {
   notes?: string;
   slotId?: string;
   sessionId?: string;
+  // simple recurrence support
+  recurrence?: {
+    freq?: "daily" | "weekly";
+    count?: number; // number of occurrences
+    until?: string; // ISO date limit
+  };
 };
 
 const DEMO_SLOTS = [
@@ -121,6 +127,84 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid slot time range" }, { status: 400 });
   }
 
+  // Prevent overlapping slots for the same expert
+  const overlapping = await db
+    .select()
+    .from(availabilitySlots)
+    .where(
+      and(
+        eq(availabilitySlots.expertClerkId, signedIn.userId),
+        lt(availabilitySlots.startAt, endAt),
+        gt(availabilitySlots.endAt, startAt)
+      )
+    )
+    .limit(1);
+
+  if (overlapping.length > 0) {
+    return NextResponse.json({ error: "Overlapping slot exists" }, { status: 409 });
+  }
+
+  // Support simple recurrence: daily or weekly
+  const createdRows: any[] = [];
+  const recurrence = body.recurrence;
+  if (recurrence && (recurrence.freq === "daily" || recurrence.freq === "weekly")) {
+    const freq = recurrence.freq === "daily" ? 1 : 7;
+    const maxCount = Math.min(recurrence.count ?? 8, 52);
+    let occurrenceStart = new Date(startAt);
+    let occurrenceEnd = new Date(endAt);
+
+    for (let i = 0; i < maxCount; i++) {
+      // stop if until is set and we passed it
+      if (recurrence.until) {
+        const untilDate = new Date(recurrence.until);
+        if (Number.isFinite(untilDate.getTime()) && occurrenceStart > untilDate) break;
+      }
+
+      // check overlapping for this occurrence
+      // eslint-disable-next-line no-await-in-loop
+      const overlap = await db
+        .select()
+        .from(availabilitySlots)
+        .where(
+          and(
+            eq(availabilitySlots.expertClerkId, signedIn.userId),
+            lt(availabilitySlots.startAt, occurrenceEnd),
+            gt(availabilitySlots.endAt, occurrenceStart)
+          )
+        )
+        .limit(1);
+
+      if (overlap.length > 0) {
+        // skip this occurrence
+      } else {
+        // eslint-disable-next-line no-await-in-loop
+        const [row] = await db
+          .insert(availabilitySlots)
+          .values({
+            expertClerkId: signedIn.userId,
+            expertName:
+              `${signedIn.user.firstName ?? ""} ${signedIn.user.lastName ?? ""}`.trim() ||
+              signedIn.user.emailAddresses[0]?.emailAddress ||
+              "Expert",
+            startAt: new Date(occurrenceStart),
+            endAt: new Date(occurrenceEnd),
+            timezone: body.timezone || "UTC",
+            notes: body.notes || "",
+            isBooked: false,
+          })
+          .returning();
+
+        if (row) createdRows.push(row);
+      }
+
+      // advance
+      occurrenceStart = new Date(occurrenceStart.getTime() + freq * 24 * 60 * 60 * 1000);
+      occurrenceEnd = new Date(occurrenceEnd.getTime() + freq * 24 * 60 * 60 * 1000);
+    }
+
+    return NextResponse.json(createdRows, { status: 201 });
+  }
+
   const [created] = await db
     .insert(availabilitySlots)
     .values({
@@ -131,7 +215,7 @@ export async function POST(req: Request) {
         "Expert",
       startAt,
       endAt,
-      timezone: body.timezone || "Asia/Kolkata",
+      timezone: body.timezone || "UTC",
       notes: body.notes || "",
       isBooked: false,
     })
