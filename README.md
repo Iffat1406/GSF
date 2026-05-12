@@ -15,13 +15,14 @@ GSF is a professional platform connecting student founders with world-class expe
 ## 📚 Table of Contents
 
 - [Live Platform](#live-platform)
-- [What GSF Does](#what-gsf-does)
 - [Features](#features)
-- [Tech Stack](#tech-stack)
+- [What GSF Does](#what-gsf-does)
+- [Design System](#design-system)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
+- [Tech Stack](#tech-stack)
 - [Architecture](#architecture-route-groups--role-areas)
-- [Route Inventory](#route-inventory-current)
+- [Route Inventory](#route-inventory)
 - [Environment Variables](#environment-variables)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
@@ -31,13 +32,13 @@ GSF is a professional platform connecting student founders with world-class expe
 
 ---
 
-## 🌐 Live Platform
+## Live Platform
 
 **URL:** [http://localhost:3000](http://localhost:3000) (development)  
 
 ---
 
-## ✨ Features
+## Features
 
 - 1-on-1 mentorship calls with industry experts
 - Equity-based venture marketplace
@@ -50,7 +51,7 @@ GSF is a professional platform connecting student founders with world-class expe
 
 ---
 
-## 🧭 What GSF Does
+## What GSF Does
 
 | Feature | Description |
 |---|---|
@@ -67,7 +68,7 @@ GSF is a professional platform connecting student founders with world-class expe
 
 ---
 
-## 🎨 Design System
+## Design System
 
 | Token | Value | Usage |
 |---|---|---|
@@ -85,7 +86,7 @@ GSF is a professional platform connecting student founders with world-class expe
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 app/
@@ -119,7 +120,7 @@ components/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -188,7 +189,7 @@ npm run lint     # Run ESLint
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -204,7 +205,7 @@ npm run lint     # Run ESLint
 
 ---
 
-## 🧱 Architecture: route groups & role areas
+## Architecture: route groups & role areas
 
 This project uses Next.js App Router route groups plus Clerk-based RBAC.
 
@@ -226,7 +227,7 @@ Authorization is enforced in `middleware.ts` using Clerk session claims (JWT met
 
 ---
 
-## 📄 Route Inventory (current)
+## Route Inventory
 
 > Routes are organized into **public marketing pages**, **dashboards by role**, and **API endpoints** under `app/api`.
 
@@ -299,7 +300,7 @@ Authorization is enforced in `middleware.ts` using Clerk session claims (JWT met
 
 ---
 
-## 🔧 Environment Variables
+## Environment Variables
 
 Create a `.env.local` file in the root:
 
@@ -311,7 +312,7 @@ Create a `.env.local` file in the root:
 
 ---
 
-## 📦 Deployment
+## Deployment
 
 ### Deploy to Vercel (Recommended)
 
@@ -330,7 +331,7 @@ npm run start
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 New contributors should be able to:
 - run the app locally
@@ -373,7 +374,7 @@ npm run build  # Optional but recommended before PR
 
 ---
 
-## 🛡️ Repository Standards
+## Repository Standards
 
 ### Branch Protection
 - Direct pushes to `main` are restricted
@@ -393,7 +394,7 @@ npm run build  # Optional but recommended before PR
 
 ---
 
-## 🏷️ Issue Labels
+## Issue Labels
 
 | Label | Description |
 |---|---|
@@ -406,7 +407,7 @@ npm run build  # Optional but recommended before PR
 ---
 
 
-## 📬 Contact
+## Contact
 
 **Email:** hello@gsf.community  
 **Website:** gsf.community  
@@ -420,6 +421,6 @@ npm run build  # Optional but recommended before PR
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
