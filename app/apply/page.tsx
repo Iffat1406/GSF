@@ -58,7 +58,12 @@ export default function ApplyPage() {
                 </div>
               </div>
 
+<<<<<<< HEAD
               <div className="lg:col-span-3 card p-8 bg-white">
+=======
+              {/* Right form */}
+              <div className="lg:col-span-3 card p-8 bg-white dark:bg-slate-800">
+>>>>>>> 37ebe4d3ed4dde1d0da84304b4ee4e344bc8ae31
                 <h2 className="text-lg font-semibold text-[#1A2332] mb-6">Create your account</h2>
                 <ApplyForm />
               </div>

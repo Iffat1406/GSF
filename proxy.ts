@@ -9,7 +9,8 @@ const isProtectedRoute = createRouteMatcher([
   "/api/onboarding-complete",
 ]);
 
-export default clerkMiddleware(async (auth, req: NextRequest) => {
+// Next.js 16 requires a named export called "proxy" (not default export)
+export const proxy = clerkMiddleware(async (auth, req: NextRequest) => {
   if (isProtectedRoute(req)) {
     await auth.protect();
   }
