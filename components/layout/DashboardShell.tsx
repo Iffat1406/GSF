@@ -45,7 +45,6 @@ interface DashboardShellProps {
 export function DashboardShell({ children, role }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen]   = useState(false);
-  const [notifCount]                  = useState(3);
   const [notifCount, setNotifCount]   = useState(0);
   const [notificationsList, setNotificationsList] = useState<any[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -73,6 +72,34 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
   async function handleLogout() {
     await signOut();
     router.push("/");
+  }
+
+  // Helper functions
+  async function fetchNotifications() {
+    try {
+      const res = await fetch('/api/notifications');
+      const data = await res.json();
+      setNotificationsList(data);
+      setNotifCount(data.filter((n: any) => n.status !== 'read').length);
+    } catch (e) {
+      console.error('Failed to fetch notifications', e);
+    }
+  }
+  async function markRead(id: string) {
+    try {
+      await fetch(`/api/notifications/${id}/read`, { method: 'POST' });
+      await fetchNotifications();
+    } catch (e) {
+      console.error('Failed to mark notification read', e);
+    }
+  }
+  async function markAllRead() {
+    try {
+      await fetch('/api/notifications/markAllRead', { method: 'POST' });
+      await fetchNotifications();
+    } catch (e) {
+      console.error('Failed to mark all read', e);
+    }
   }
 
   const sidebarContent = (
