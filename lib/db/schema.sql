@@ -205,3 +205,35 @@ CREATE TRIGGER experts_updated_at BEFORE UPDATE ON experts
 
 CREATE TRIGGER sessions_updated_at BEFORE UPDATE ON sessions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- NOTIFICATIONS TABLE
+-- ============================================================
+
+CREATE TABLE notifications (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  clerk_user_id VARCHAR(255) NOT NULL,
+  type          VARCHAR(50) NOT NULL DEFAULT 'system',
+  title         VARCHAR(500) NOT NULL,
+  message       TEXT NOT NULL,
+  is_read       BOOLEAN DEFAULT FALSE,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- MESSAGES TABLE
+-- ============================================================
+
+CREATE TABLE messages (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  sender_id     VARCHAR(255) NOT NULL,
+  receiver_id   VARCHAR(255) NOT NULL,
+  text          TEXT NOT NULL,
+  is_read       BOOLEAN DEFAULT FALSE,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_notifications_user ON notifications(clerk_user_id);
+CREATE INDEX idx_messages_sender ON messages(sender_id);
+CREATE INDEX idx_messages_receiver ON messages(receiver_id);
+

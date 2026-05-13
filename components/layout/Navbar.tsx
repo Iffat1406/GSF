@@ -9,6 +9,7 @@ import { Menu, X, Video, Lightbulb, Users, BookOpen, Rocket, Zap, LogOut, Layout
 import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 
 const NAV_LINKS = [
   { label: "Connect",   href: "/connect",   icon: Video },
@@ -108,6 +109,7 @@ export function Navbar() {
                 <div className="size-8 rounded-full animate-pulse" style={{ backgroundColor: "var(--bg-surface-2)" }} />
               ) : isSignedIn && user ? (
                 <>
+                  <NotificationBell />
                   <Link
                     href={dashboardHref}
                     className="btn-ghost text-sm py-2 px-4 flex items-center gap-1.5"
@@ -157,15 +159,18 @@ export function Navbar() {
               )}
             </div>
 
-            {/* Mobile hamburger */}
-            <button
-              className="lg:hidden p-2 rounded-lg transition-colors"
-              style={{ color: "var(--text-secondary)" }}
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-            </button>
+            {/* Mobile header additions */}
+            <div className="flex items-center gap-1 lg:hidden">
+              {isSignedIn && user && <NotificationBell />}
+              <button
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: "var(--text-secondary)" }}
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+              </button>
+            </div>
           </div>
         </div>
       </header>

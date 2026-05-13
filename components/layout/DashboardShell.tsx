@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
 import type { AuthUser } from "@/lib/auth";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 import {
   LayoutDashboard, Lightbulb, TrendingUp, Users, MessageSquare,
   Coins, User, Menu, X, Briefcase, Calendar, Star, LogOut,
@@ -45,7 +46,6 @@ interface DashboardShellProps {
 export function DashboardShell({ children, role }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen]   = useState(false);
-  const [notifCount]                  = useState(3);
   const pathname = usePathname();
   const router   = useRouter();
   
@@ -267,17 +267,7 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
           <div className="flex-1" />
 
           {/* Right side: notifications + user */}
-          <button className="relative p-2 rounded-xl transition-colors" style={{ color: "var(--text-muted)" }}>
-            <Bell className="size-4" />
-            {notifCount > 0 && (
-              <span
-                className="absolute top-1 right-1 size-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
-                style={{ backgroundColor: "#EF4444" }}
-              >
-                {notifCount}
-              </span>
-            )}
-          </button>
+          <NotificationBell />
 
           {user && (
             <div className="flex items-center gap-2">

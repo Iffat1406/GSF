@@ -91,6 +91,31 @@ export const creditTransactions = pgTable("credit_transactions", {
 });
 
 // ===================================================
+// NOTIFICATIONS
+// ===================================================
+export const notifications = pgTable("notifications", {
+  id:          uuid("id").defaultRandom().primaryKey(),
+  clerkUserId: text("clerk_user_id").notNull(),
+  type:        text("type").notNull().default("system"), // system | activity | message | announcement
+  title:       text("title").notNull().default(""),
+  message:     text("message").notNull().default(""),
+  isRead:      boolean("is_read").default(false),
+  createdAt:   timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
+// MESSAGES
+// ===================================================
+export const messages = pgTable("messages", {
+  id:         uuid("id").defaultRandom().primaryKey(),
+  senderId:   text("sender_id").notNull(),
+  receiverId: text("receiver_id").notNull(),
+  text:       text("text").notNull().default(""),
+  isRead:     boolean("is_read").default(false),
+  createdAt:  timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
 // TYPE EXPORTS
 // ===================================================
 export type Venture              = typeof ventures.$inferSelect;
@@ -101,3 +126,7 @@ export type Session              = typeof sessions.$inferSelect;
 export type NewSession           = typeof sessions.$inferInsert;
 export type CreditTransaction    = typeof creditTransactions.$inferSelect;
 export type NewCreditTransaction = typeof creditTransactions.$inferInsert;
+export type Notification         = typeof notifications.$inferSelect;
+export type NewNotification      = typeof notifications.$inferInsert;
+export type Message              = typeof messages.$inferSelect;
+export type NewMessage           = typeof messages.$inferInsert;

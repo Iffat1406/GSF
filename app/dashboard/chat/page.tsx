@@ -68,46 +68,62 @@ export default function ChatPage() {
   const { user: clerkUser } = useUser();
   const session = clerkUser ? clerkUserToAuthUser(clerkUser) : null;
   const [activeId, setActiveId] = useState(1);
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  const [threadMessages, setThreadMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const fetchThread = async (contactId: number) => {
+    try {
+      const res = await fetch(`/api/messages?contactId=${contactId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setThreadMessages(data);
+      }
+    } catch (err) {
+      setThreadMessages(INITIAL_MESSAGES[contactId] ?? []);
+    }
+  };
+
+  useEffect(() => {
+    fetchThread(activeId);
+    const interval = setInterval(() => fetchThread(activeId), 3000);
+    return () => clearInterval(interval);
+  }, [activeId]);
+
   const activeContact = CONTACTS.find(c => c.id === activeId)!;
-  const activeMessages = messages[activeId] ?? [];
+  const activeMessages = threadMessages.length > 0 ? threadMessages : (INITIAL_MESSAGES[activeId] ?? []);
   const filtered = CONTACTS.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()));
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeMessages]);
 
-  function sendMessage() {
+  async function sendMessage() {
     if (!input.trim()) return;
-    const now = new Date();
-    const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const newMsg: Message = { id: Date.now(), from: "me", text: input.trim(), time, read: false };
-    setMessages(prev => ({ ...prev, [activeId]: [...(prev[activeId] ?? []), newMsg] }));
+    const textToSend = input.trim();
     setInput("");
 
-    // Simulate reply after 1.5s
-    setTimeout(() => {
-      const replies = [
-        "That's a great point! Let me think about it.",
-        "Absolutely, I'll send you more details soon.",
-        "Thanks for sharing! This is helpful.",
-        "Let's discuss this in our next session.",
-        "Sounds good! I'll review and get back to you.",
-      ];
-      const reply: Message = {
-        id: Date.now() + 1,
-        from: "them",
-        text: replies[Math.floor(Math.random() * replies.length)],
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-      setMessages(prev => ({ ...prev, [activeId]: [...(prev[activeId] ?? []), reply] }));
-    }, 1500);
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const optimisticMsg: Message = { id: Date.now(), from: "me", text: textToSend, time: timeStr, read: false };
+    setThreadMessages(prev => [...prev, optimisticMsg]);
+
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contactId: String(activeId), text: textToSend }),
+      });
+      if (res.ok) {
+        setTimeout(() => fetchThread(activeId), 600);
+        setTimeout(() => fetchThread(activeId), 2000);
+      }
+    } catch (err) {
+      // Quiet catch
+    }
   }
 
   const EMOJIS = ["👍", "🔥", "💡", "🎯", "✅", "🚀", "💪", "😊", "🙌", "❤️"];

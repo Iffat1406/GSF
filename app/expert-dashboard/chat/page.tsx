@@ -52,30 +52,59 @@ export default function ExpertChatPage() {
   const { user: clerkUser } = useUser();
   const session = clerkUser ? clerkUserToAuthUser(clerkUser) : null;
   const [activeId, setActiveId] = useState(1);
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  const [threadMessages, setThreadMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const fetchThread = async (contactId: number) => {
+    try {
+      const res = await fetch(`/api/messages?contactId=${contactId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setThreadMessages(data);
+      }
+    } catch (err) {
+      setThreadMessages(INITIAL_MESSAGES[contactId] ?? []);
+    }
+  };
+
+  useEffect(() => {
+    fetchThread(activeId);
+    const interval = setInterval(() => fetchThread(activeId), 3000);
+    return () => clearInterval(interval);
+  }, [activeId]);
+
   const active = CONTACTS.find(c => c.id === activeId)!;
-  const activeMessages = messages[activeId] ?? [];
+  const activeMessages = threadMessages.length > 0 ? threadMessages : (INITIAL_MESSAGES[activeId] ?? []);
   const filtered = CONTACTS.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()));
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [activeMessages]);
 
-  function sendMessage() {
+  async function sendMessage() {
     if (!input.trim()) return;
-    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const newMsg: Message = { id: Date.now(), from: "me", text: input.trim(), time, read: false };
-    setMessages(prev => ({ ...prev, [activeId]: [...(prev[activeId] ?? []), newMsg] }));
+    const textToSend = input.trim();
     setInput("");
-    setTimeout(() => {
-      const replies = ["Thanks for the quick reply!", "Got it! I'll prepare accordingly.", "Perfect, see you then!", "Can you elaborate on that?", "Much appreciated!"];
-      const reply: Message = { id: Date.now() + 1, from: "them", text: replies[Math.floor(Math.random() * replies.length)], time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
-      setMessages(prev => ({ ...prev, [activeId]: [...(prev[activeId] ?? []), reply] }));
-    }, 1500);
+
+    const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const optimisticMsg: Message = { id: Date.now(), from: "me", text: textToSend, time: timeStr, read: false };
+    setThreadMessages(prev => [...prev, optimisticMsg]);
+
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contactId: String(activeId), text: textToSend }),
+      });
+      if (res.ok) {
+        setTimeout(() => fetchThread(activeId), 600);
+        setTimeout(() => fetchThread(activeId), 2000);
+      }
+    } catch (err) {
+      // Quiet catch
+    }
   }
 
   return (
