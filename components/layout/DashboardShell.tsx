@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
 import type { AuthUser } from "@/lib/auth";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 import {
   LayoutDashboard, Lightbulb, TrendingUp, Users, MessageSquare,
   Coins, User, Menu, X, Briefcase, Calendar, Star, LogOut,
