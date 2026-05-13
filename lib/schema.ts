@@ -29,6 +29,7 @@ export const ventures = pgTable("ventures", {
   teamMembers:     jsonb("team_members").$type<any[]>().default([]),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tractionMetrics: jsonb("traction_metrics").$type<any[]>().default([]),
+  tags:            text("tags").array().default([]),
   createdAt:       timestamp("created_at").defaultNow(),
   updatedAt:       timestamp("updated_at").defaultNow(),
 });
@@ -51,6 +52,7 @@ export const expertProfiles = pgTable("expert_profiles", {
   totalSessions:    integer("total_sessions").default(0),
   rating:           text("rating").default("0"),
   isVerified:       boolean("is_verified").default(false),
+  tags:             text("tags").array().default([]),
   createdAt:        timestamp("created_at").defaultNow(),
   updatedAt:        timestamp("updated_at").defaultNow(),
 });
@@ -116,6 +118,17 @@ export const messages = pgTable("messages", {
 });
 
 // ===================================================
+// FEED INTERACTIONS
+// ===================================================
+export const feedInteractions = pgTable("feed_interactions", {
+  id:          uuid("id").defaultRandom().primaryKey(),
+  clerkUserId: text("clerk_user_id").notNull(),
+  targetId:    text("target_id").notNull(),
+  action:      text("action").notNull(), // 'connect' | 'dismiss' | 'save'
+  createdAt:   timestamp("created_at").defaultNow(),
+});
+
+// ===================================================
 // TYPE EXPORTS
 // ===================================================
 export type Venture              = typeof ventures.$inferSelect;
@@ -130,3 +143,5 @@ export type Notification         = typeof notifications.$inferSelect;
 export type NewNotification      = typeof notifications.$inferInsert;
 export type Message              = typeof messages.$inferSelect;
 export type NewMessage           = typeof messages.$inferInsert;
+export type FeedInteraction      = typeof feedInteractions.$inferSelect;
+export type NewFeedInteraction   = typeof feedInteractions.$inferInsert;

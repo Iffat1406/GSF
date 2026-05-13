@@ -237,3 +237,21 @@ CREATE INDEX idx_notifications_user ON notifications(clerk_user_id);
 CREATE INDEX idx_messages_sender ON messages(sender_id);
 CREATE INDEX idx_messages_receiver ON messages(receiver_id);
 
+-- ============================================================
+-- MATCHMAKING & DISCOVERY FEED UPDATES
+-- ============================================================
+
+ALTER TABLE ventures ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
+ALTER TABLE expert_profiles ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
+
+CREATE TABLE feed_interactions (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  clerk_user_id VARCHAR(255) NOT NULL,
+  target_id     VARCHAR(255) NOT NULL,
+  action        VARCHAR(50) NOT NULL,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_feed_interactions_user ON feed_interactions(clerk_user_id);
+
+
