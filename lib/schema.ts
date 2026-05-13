@@ -102,6 +102,7 @@ export const expertProfiles = pgTable("expert_profiles", {
   totalSessions:    integer("total_sessions").default(0),
   rating:           text("rating").default("0"),
   isVerified:       boolean("is_verified").default(false),
+  tags:             text("tags").array().default([]),
   createdAt:        timestamp("created_at").defaultNow(),
   updatedAt:        timestamp("updated_at").defaultNow(),
 });

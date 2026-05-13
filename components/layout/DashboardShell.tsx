@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
 import type { AuthUser } from "@/lib/auth";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 import {
   LayoutDashboard, Lightbulb, TrendingUp, Users, MessageSquare,
   Coins, User, Menu, X, Briefcase, Calendar, Star, LogOut,
@@ -45,11 +46,42 @@ interface DashboardShellProps {
 export function DashboardShell({ children, role }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen]   = useState(false);
-  const [notifCount, setNotifCount]   = useState(0);
+  const [notifCount, setNotifCount]   = useState(3);
   const [notificationsList, setNotificationsList] = useState<any[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const pathname = usePathname();
   const router   = useRouter();
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch("/api/notifications");
+      if (res.ok) {
+        const data = await res.json();
+        setNotificationsList(data);
+        setNotifCount(data.filter((n: any) => n.status !== "read").length);
+      }
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err);
+    }
+  };
+
+  const markRead = async (id: string) => {
+    try {
+      await fetch(`/api/notifications/${id}`, { method: "PATCH", body: JSON.stringify({ status: "read" }) });
+      await fetchNotifications();
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
+
+  const markAllRead = async () => {
+    try {
+      await fetch("/api/notifications/mark-all-read", { method: "POST" });
+      await fetchNotifications();
+    } catch (err) {
+      console.error("Failed to mark all notifications as read:", err);
+    }
+  };
   
   const { user: clerkUser, isLoaded } = useUser();
   const { signOut } = useClerk();

@@ -12,6 +12,7 @@ import { clerkUserToAuthUser } from "@/lib/auth";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 const NAV_LINKS = [
+  { label: "Discover",  href: "/discover",  icon: Sparkles },
   { label: "Connect",   href: "/connect",   icon: Video },
   { label: "Ventures",  href: "/ventures",  icon: Lightbulb },
   { label: "Experts",   href: "/experts",   icon: Users },
@@ -110,6 +111,7 @@ export function Navbar() {
                 <div className="size-8 rounded-full animate-pulse" style={{ backgroundColor: "var(--bg-surface-2)" }} />
               ) : isSignedIn && user ? (
                 <>
+                  <NotificationBell />
                   <Link
                     href={dashboardHref}
                     className="btn-ghost text-sm py-2 px-4 flex items-center gap-1.5"
@@ -161,15 +163,18 @@ export function Navbar() {
               <ThemeToggle />
             </div>
 
-            {/* Mobile hamburger */}
-            <button
-              className="lg:hidden p-2 rounded-lg transition-colors"
-              style={{ color: "var(--text-secondary)" }}
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-            </button>
+            {/* Mobile header additions */}
+            <div className="flex items-center gap-1 lg:hidden">
+              {isSignedIn && user && <NotificationBell />}
+              <button
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: "var(--text-secondary)" }}
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+              </button>
+            </div>
           </div>
         </div>
       </header>
