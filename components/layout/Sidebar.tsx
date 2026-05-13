@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useClerk } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   Map,
@@ -42,7 +43,14 @@ interface SidebarProps {
 
 export function Sidebar({ role = "student", userName = "Student", userEmail = "" }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { signOut } = useClerk();
   const navItems = role === "expert" ? EXPERT_NAV : STUDENT_NAV;
+
+  async function handleSignOut() {
+    await signOut();
+    router.push("/");
+  }
 
   return (
     <aside className="w-64 bg-white dark:bg-slate-900 border-r border-border dark:border-slate-700 flex flex-col h-full">
@@ -93,7 +101,10 @@ export function Sidebar({ role = "student", userName = "Student", userEmail = ""
             <p className="text-xs font-semibold text-text-primary truncate">{userName}</p>
             <p className="text-xs text-text-muted truncate">{userEmail || role}</p>
           </div>
-          <button className="text-text-muted hover:text-text-secondary dark:hover:text-slate-100 transition-colors p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700">
+          <button
+            onClick={handleSignOut}
+            aria-label="Sign out"
+            className="text-text-muted hover:text-text-secondary dark:hover:text-slate-100 transition-colors p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700">
             <LogOut className="size-3.5" />
           </button>
         </div>
