@@ -5,14 +5,22 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { IntroAnimationWrapper } from "@/components/landing/IntroAnimation";
 import Link from "next/link";
-import { Video, Lightbulb, Users, ArrowRight, Shield, Star, Crown } from "lucide-react";
+import {
+  Video,
+  Lightbulb,
+  Users,
+  ArrowRight,
+  Shield,
+  Star,
+  Crown,
+} from "lucide-react";
 import { showSuccess } from "@/utils/toast";
-import { cn } from "@/lib/utils";
 
 export default function HomePage() {
   return (
     <IntroAnimationWrapper>
       <Navbar />
+
       <main>
         <HeroSection />
 
@@ -20,55 +28,94 @@ export default function HomePage() {
         <section className="bg-surface border-y border-border py-20">
           <div className="section-container">
             <div className="text-center mb-14">
-              <h2 className="text-4xl sm:text-5xl text-text-primary mb-4"
-                style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2
+                className="text-4xl sm:text-5xl text-text-primary mb-4"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
                 Two platforms. One mission.
               </h2>
+
               <p className="text-text-secondary text-lg max-w-xl mx-auto">
-                Connect with experts who&apos;ve done it. Fund the ideas that will shape tomorrow.
+                Connect with experts who&apos;ve done it. Fund the ideas that
+                will shape tomorrow.
               </p>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-              {/* Connect */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* CONNECT */}
               <div className="card p-8 card-hover group">
                 <div className="size-14 rounded-2xl bg-surface-2 flex items-center justify-center mb-6 border border-border">
                   <Video className="size-7 text-[var(--accent-indigo)]" />
                 </div>
-                <h3 className="text-2xl text-text-primary mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+
+                <h3
+                  className="text-2xl text-text-primary mb-3"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                >
                   GSF Connect
                 </h3>
+
                 <p className="text-text-secondary leading-relaxed mb-6">
-                  Book 1-on-1 video calls with world-class startup experts. Continue the conversation via direct chat. Like Zoom — built exclusively for ambitious student founders.
+                  Book 1-on-1 video calls with world-class startup experts.
+                  Continue the conversation via direct chat.
                 </p>
+
                 <div className="flex flex-wrap gap-2 mb-8">
-                  {["Live Video Calls", "Expert Chat", "Calendar Booking", "Session Notes"].map((f) => (
-                    <span key={f} className="badge badge-blue">{f}</span>
+                  {[
+                    "Live Video Calls",
+                    "Expert Chat",
+                    "Calendar Booking",
+                    "Session Notes",
+                  ].map((f) => (
+                    <span key={f} className="badge badge-blue">
+                      {f}
+                    </span>
                   ))}
                 </div>
+
                 <Link href="/connect" className="btn-primary text-sm px-6 py-2.5">
                   Find an Expert <ArrowRight className="size-4" />
                 </Link>
               </div>
 
-              {/* Ventures */}
-              <div className="card p-8 card-hover" style={{ borderColor: '#D2C4B4' }}>
+              {/* VENTURES */}
+              <div
+                className="card p-8 card-hover"
+                style={{ borderColor: "#D2C4B4" }}
+              >
                 <div className="size-14 rounded-2xl bg-surface-2 flex items-center justify-center mb-6 border border-border">
                   <Lightbulb className="size-7 text-text-primary" />
                 </div>
-                <h3 className="text-2xl text-text-primary mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+
+                <h3
+                  className="text-2xl text-text-primary mb-3"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                >
                   GSF Ventures
                 </h3>
+
                 <p className="text-text-secondary leading-relaxed mb-6">
-                  Students list startup ideas with equity terms. Venture creators and investors fund them directly. GSF earns a transparent 1–2% fee on successful deals — nothing more.
+                  Students list startup ideas with equity terms. Investors fund
+                  them directly.
                 </p>
+
                 <div className="flex flex-wrap gap-2 mb-8">
-                  {["Equity Deals", "Investor Network", "1–2% Fee Only", "Escrow Protected"].map((f) => (
-                    <span key={f} className="badge badge-warm">{f}</span>
+                  {[
+                    "Equity Deals",
+                    "Investor Network",
+                    "1–2% Fee Only",
+                    "Escrow Protected",
+                  ].map((f) => (
+                    <span key={f} className="badge badge-warm">
+                      {f}
+                    </span>
                   ))}
                 </div>
-                <Link href="/ventures"
-                  className="inline-flex items-center gap-2 bg-[#D2C4B4] text-[#1A2332] font-semibold px-6 py-2.5 rounded-xl hover:bg-[#AACDDC] transition-all text-sm shadow-soft-sm">
+
+                <Link
+                  href="/ventures"
+                  className="inline-flex items-center gap-2 bg-[#D2C4B4] text-[#1A2332] font-semibold px-6 py-2.5 rounded-xl hover:bg-[#AACDDC] transition-all text-sm shadow-soft-sm"
+                >
                   Browse Ventures <ArrowRight className="size-4" />
                 </Link>
               </div>
@@ -76,7 +123,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Test Toast Button */}
+        {/* Toast button */}
         <div className="text-center py-4">
           <button
             onClick={() => showSuccess("Toast notification working! 🎉")}
@@ -86,215 +133,108 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Subscription plans */}
+        {/* PRICING */}
         <section className="section-container section-padding">
           <div className="text-center mb-14">
-            <span className="badge badge-blue mb-4">
-              Transparent pricing
-            </span>
-            <h2 className="text-4xl font-bold text-text-primary mb-4"
-              style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2
+              className="text-4xl font-bold text-text-primary mb-4"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
               Choose your plan
             </h2>
-            <p className="text-text-secondary max-w-xl mx-auto">
-              Start with Basic free for your first 30 days. Upgrade anytime to unlock senior experts and exclusive GSF access.
-            </p>
           </div>
 
-          {/* 3–plan grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
               {
                 name: "Basic",
                 price: "₹499",
-                period: "/month",
-                freeBadge: true,
-                credits: "600 credits / month",
-                experienceRange: "0–10 yrs experience experts",
-                icon: Shield,
-                iconColor: "text-[#81A6C6] dark:text-blue-300",
-                iconBg: "bg-[#EEF4F9] dark:bg-slate-800 border-[#AACDDC] dark:border-slate-700",
-                features: [
-                  "600 credits / month",
-                  "Connect with experts: 0–10 yrs experience",
-                  "Venture marketplace access",
-                  "Community & peer circles",
-                ],
                 highlight: false,
-                cta: "Start free — 30 days",
-                ctaHref: "/sign-up",
+                freeBadge: true,
+                icon: Shield,
               },
               {
                 name: "Standard",
                 price: "₹999",
-                period: "/month",
-                freeBadge: false,
-                credits: "1,500 credits / month",
-                experienceRange: "10–15 yrs experience experts",
-                icon: Star,
-                iconColor: "text-[#3D74A0] dark:text-blue-400",
-                iconBg: "bg-[#DCEEF8] dark:bg-slate-800 border-[#81A6C6] dark:border-slate-700",
-                features: [
-                  "1,500 credits / month",
-                  "Connect with experts: 10–15 yrs experience",
-                  "Priority booking slots",
-                  "All Basic features",
-                ],
                 highlight: true,
-                cta: "Choose Standard",
-                ctaHref: "/sign-up",
+                icon: Star,
               },
               {
                 name: "Premium",
-                price: "₹1,499",
-                period: "/month",
-                freeBadge: false,
-                credits: "2,000 credits / month",
-                experienceRange: "15+ yrs · GSF exclusive experts",
-                icon: Crown,
-                iconColor: "text-[#5B4A3A] dark:text-amber-200",
-                iconBg: "bg-[#F3E3D0] dark:bg-slate-800 border-[#D2C4B4] dark:border-slate-700",
-                features: [
-                  "2,000 credits / month",
-                  "Exclusive GSF experts: 15+ yrs experience",
-                  "Investor introductions",
-                  "All Standard features",
-                ],
+                price: "₹1499",
                 highlight: false,
-                cta: "Choose Premium",
-                ctaHref: "/sign-up",
+                icon: Crown,
               },
             ].map((plan) => {
-              const PlanIcon = plan.icon;
+              const Icon = plan.icon;
+
               return (
                 <div
                   key={plan.name}
                   className={`card p-6 flex flex-col card-hover ${
                     plan.highlight
-                      ? "border-[#81A6C6] shadow-[0_4px_24px_rgba(129,166,198,0.22)] relative"
+                      ? "border-[#81A6C6] shadow-[0_4px_24px_rgba(129,166,198,0.22)]"
                       : ""
                   }`}
                 >
                   {plan.highlight && (
-                    <span className="badge badge-blue text-xs mb-3 w-fit">Most Popular</span>
-                  )}
-                  {plan.freeBadge && (
-                    <span className="badge badge-warm text-xs mb-3 w-fit">Free first 30 days</span>
-                  )}
-
-                  {/* Icon */}
-                  <div className={`size-12 rounded-xl flex items-center justify-center mb-4 border ${plan.iconBg}`}>
-                    <PlanIcon className={`size-6 ${plan.iconColor}`} />
-                  </div>
-
-                  <div className="font-bold text-lg text-text-primary mb-1">{plan.name}</div>
-                  <div className="mb-1">
-                    <span
-                      className="text-3xl font-bold"
-                      style={{
-                        fontFamily: "'Playfair Display', serif",
-                        background: "linear-gradient(90deg, #5B8CFF, #22D3EE)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      {plan.price}
+                    <span className="badge badge-blue text-xs mb-3 w-fit">
+                      Most Popular
                     </span>
-                    <span className="text-xs text-text-muted ml-1">{plan.period}</span>
-                  </div>
-                  <div className="text-xs font-medium text-accent-primary mb-1">{plan.credits}</div>
+                  )}
 
-                  {/* Experience range badge */}
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary bg-surface-2 border border-border rounded-lg px-2 py-1 mb-5 w-fit">
-                    {plan.experienceRange}
-                  </div>
+                  {plan.freeBadge && (
+                    <span className="badge badge-warm text-xs mb-3 w-fit">
+                      Free first 30 days
+                    </span>
+                  )}
 
-                  <ul className="space-y-2.5 flex-1 mb-6">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-xs text-text-secondary">
-                        <span className="size-1.5 rounded-full bg-accent-primary shrink-0 mt-1" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
+                  <Icon className="size-6 mb-3" />
 
-                  <Link
-                    href={plan.ctaHref}
-                    className={plan.highlight ? "btn-primary justify-center text-sm" : "btn-outline justify-center text-sm"}
-                  >
-                    {plan.cta}
+                  <div className="font-bold text-lg">{plan.name}</div>
+                  <div className="text-2xl font-bold">{plan.price}</div>
+
+                  <Link href="/sign-up" className="btn-primary mt-auto">
+                    Choose Plan
                   </Link>
                 </div>
               );
             })}
           </div>
-
-          <p className="text-center text-xs text-text-muted mt-8">
-            All plans include auto-pay. Cancel anytime. No hidden fees.
-          </p>
         </section>
 
-        {/* Expert teaser */}
-        <section className="bg-canvas border-t border-border section-padding">
-          <div className="section-container">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-              <div className="max-w-lg">
-                <h2 className="text-4xl text-text-primary mb-4"
-                  style={{ fontFamily: "'Playfair Display', serif" }}>
-                  40+ experts.<br />
-                  <span className="text-gradient-primary">Zero gatekeepers.</span>
-                </h2>
-                <p className="text-text-secondary leading-relaxed mb-6">
-                  VCs, exited founders, product leaders, legal advisors — every GSF expert is vetted, accessible, and ready to give you the real talk that books never will.
-                </p>
-                <Link href="/experts" className="btn-primary px-7 py-3">
-                  <Users className="size-4" />
-                  Meet the Experts
-                </Link>
+        {/* EXPERTS */}
+        <section className="section-padding">
+          <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
+            {[
+              { initials: "AP", name: "Anika P.", role: "VC" },
+              { initials: "JW", name: "James W.", role: "Founder" },
+              { initials: "SM", name: "Sara M.", role: "Product" },
+            ].map((e) => (
+              <div
+                key={e.initials}
+                className="card p-3 text-center card-hover"
+              >
+                <div className="size-10 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-bold border">
+                  {e.initials}
+                </div>
+                <div className="text-xs font-semibold">{e.name}</div>
+                <div className="text-[10px] text-text-muted">{e.role}</div>
               </div>
-              <div className="grid grid-cols-3 gap-3 w-full max-w-xs">
-                {[
-                  { initials: "AP", name: "Anika P.", role: "VC Partner", bg: "bg-[#EEF4F9] dark:bg-slate-800", text: "text-[#3D74A0] dark:text-blue-300" },
-                  { initials: "JW", name: "James W.", role: "Founder", bg: "bg-[#F3E3D0] dark:bg-slate-800", text: "text-[#5B4A3A] dark:text-amber-200" },
-                  { initials: "SM", name: "Sara M.", role: "Product", bg: "bg-[#EEF4F9] dark:bg-slate-800", text: "text-[#3D74A0] dark:text-blue-300" },
-                  { initials: "YT", name: "Yuki T.", role: "Growth", bg: "bg-[#F3E3D0] dark:bg-slate-800", text: "text-[#5B4A3A] dark:text-amber-200" },
-                  { initials: "RD", name: "Raj D.", role: "Legal", bg: "bg-[#EEF4F9] dark:bg-slate-800", text: "text-[#3D74A0] dark:text-blue-300" },
-                  { initials: "FA", name: "Fatima A.", role: "Impact", bg: "bg-[#F3E3D0] dark:bg-slate-800", text: "text-[#5B4A3A] dark:text-amber-200" },
-                ].map((e) => (
-                  <div key={e.initials} className="card p-3 text-center card-hover bg-card dark:bg-slate-800">
-                    <div className={cn("size-10 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-bold border border-border", e.bg, e.text)}>
-                      {e.initials}
-                    </div>
-                    <div className="text-xs font-semibold text-text-primary truncate">{e.name}</div>
-                    <div className="text-[10px] text-text-muted">{e.role}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* Final CTA */}
-        <section className="section-container py-24 text-center">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-5xl text-text-primary mb-4"
-              style={{ fontFamily: "'Playfair Display', serif" }}>
-              A Society for Founders.
-            </h2>
-            <p className="text-xl text-[var(--accent-indigo)] font-medium italic mb-8"
-              style={{ fontFamily: "'Playfair Display', serif" }}>
-              Not Talkers.
-            </p>
-            <p className="text-text-secondary mb-10">
-              Basic plan free for 30 days. No credit card. Start building today.
-            </p>
-            <Link href="/sign-up" className="btn-primary text-base px-10 py-4 mx-auto">
-              Join GSF Free <ArrowRight className="size-5" />
-            </Link>
-          </div>
+        {/* FINAL CTA */}
+        <section className="text-center py-24">
+          <h2 className="text-5xl mb-4">A Society for Founders</h2>
+
+          <Link href="/sign-up" className="btn-primary px-10 py-4">
+            Join GSF Free <ArrowRight />
+          </Link>
         </section>
       </main>
+
       <Footer />
     </IntroAnimationWrapper>
   );
