@@ -5,7 +5,21 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Video, Lightbulb, Users, BookOpen, Rocket, Zap, LogOut, LayoutDashboard, Moon, Sun } from "lucide-react";
+import {
+  Menu,
+  X,
+  Sparkles,
+  Video,
+  Lightbulb,
+  Users,
+  BookOpen,
+  Rocket,
+  Zap,
+  LogOut,
+  LayoutDashboard,
+  Moon,
+  Sun
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
