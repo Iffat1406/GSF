@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
 import type { AuthUser } from "@/lib/auth";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 import {
   LayoutDashboard, Lightbulb, TrendingUp, Users, MessageSquare,
   Coins, User, Menu, X, Briefcase, Calendar, Star, LogOut,
@@ -45,9 +46,42 @@ interface DashboardShellProps {
 export function DashboardShell({ children, role }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen]   = useState(false);
-  const [notifCount]                  = useState(3);
+  const [notifCount, setNotifCount]   = useState(3);
+  const [notificationsList, setNotificationsList] = useState<any[]>([]);
+  const [notifOpen, setNotifOpen] = useState(false);
   const pathname = usePathname();
   const router   = useRouter();
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch("/api/notifications");
+      if (res.ok) {
+        const data = await res.json();
+        setNotificationsList(data);
+        setNotifCount(data.filter((n: any) => n.status !== "read").length);
+      }
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err);
+    }
+  };
+
+  const markRead = async (id: string) => {
+    try {
+      await fetch(`/api/notifications/${id}`, { method: "PATCH", body: JSON.stringify({ status: "read" }) });
+      await fetchNotifications();
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
+
+  const markAllRead = async () => {
+    try {
+      await fetch("/api/notifications/mark-all-read", { method: "POST" });
+      await fetchNotifications();
+    } catch (err) {
+      console.error("Failed to mark all notifications as read:", err);
+    }
+  };
   
   const { user: clerkUser, isLoaded } = useUser();
   const { signOut } = useClerk();
@@ -70,6 +104,34 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
   async function handleLogout() {
     await signOut();
     router.push("/");
+  }
+
+  // Helper functions
+  async function fetchNotifications() {
+    try {
+      const res = await fetch('/api/notifications');
+      const data = await res.json();
+      setNotificationsList(data);
+      setNotifCount(data.filter((n: any) => n.status !== 'read').length);
+    } catch (e) {
+      console.error('Failed to fetch notifications', e);
+    }
+  }
+  async function markRead(id: string) {
+    try {
+      await fetch(`/api/notifications/${id}/read`, { method: 'POST' });
+      await fetchNotifications();
+    } catch (e) {
+      console.error('Failed to mark notification read', e);
+    }
+  }
+  async function markAllRead() {
+    try {
+      await fetch('/api/notifications/markAllRead', { method: 'POST' });
+      await fetchNotifications();
+    } catch (e) {
+      console.error('Failed to mark all read', e);
+    }
   }
 
   const sidebarContent = (
@@ -267,17 +329,40 @@ export function DashboardShell({ children, role }: DashboardShellProps) {
           <div className="flex-1" />
 
           {/* Right side: notifications + user */}
-          <button className="relative p-2 rounded-xl transition-colors" style={{ color: "var(--text-muted)" }}>
-            <Bell className="size-4" />
-            {notifCount > 0 && (
-              <span
-                className="absolute top-1 right-1 size-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
-                style={{ backgroundColor: "#EF4444" }}
-              >
-                {notifCount}
-              </span>
+          <div className="relative">
+            <button onClick={() => { setNotifOpen(!notifOpen); if (!notifOpen) fetchNotifications(); }} className="relative p-2 rounded-xl transition-colors" style={{ color: "var(--text-muted)" }}>
+              <Bell className="size-4" />
+              {notifCount > 0 && (
+                <span
+                  className="absolute top-1 right-1 size-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+                  style={{ backgroundColor: "#EF4444" }}
+                >
+                  {notifCount}
+                </span>
+              )}
+            </button>
+
+            {notifOpen && (
+              <div className="absolute right-0 mt-2 w-80 border rounded-lg shadow-lg z-50" style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-default)" }}>
+                <div className="p-3 border-b flex items-center justify-between" style={{ borderBottomColor: "var(--border-default)" }}>
+                  <strong className="text-sm">Notifications</strong>
+                  <button className="text-xs text-blue-600" onClick={async () => { await markAllRead(); await fetchNotifications(); }}>Mark all read</button>
+                </div>
+                <div className="max-h-64 overflow-y-auto">
+                  {notificationsList.length === 0 && <div className="p-3 text-sm" style={{ color: "var(--text-muted)" }}>No notifications</div>}
+                  {notificationsList.map((n) => (
+                    <div key={n.id} onClick={async () => { await markRead(n.id); if (n.payload?.url) window.location.href = n.payload.url; }} className={`p-3 border-b cursor-pointer transition-colors ${n.status !== 'read' ? 'hover:brightness-95' : 'brightness-90'}`} style={{ backgroundColor: n.status !== 'read' ? 'var(--bg-surface)' : 'var(--bg-surface-2)', borderBottomColor: 'var(--border-default)' }}>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{n.type}</div>
+                        <div className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{new Date(n.createdAt).toLocaleString()}</div>
+                      </div>
+                      <div className="text-xs text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>{n.payload?.message ?? JSON.stringify(n.payload ?? {})}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
-          </button>
+          </div>
 
           {user && (
             <div className="flex items-center gap-2">

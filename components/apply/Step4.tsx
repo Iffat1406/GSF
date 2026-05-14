@@ -1,18 +1,35 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
+import { showSuccess, showError } from "@/utils/toast";
+
+import type { ApplicationFormData } from "@/types";
 
 interface Step4Props {
-  formData: any;
+  formData: ApplicationFormData;
   onPrev: () => void;
 }
 
 export default function Step4({ formData, onPrev }: Step4Props) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Final form data:", formData);
-    alert("Application submitted successfully!");
-    localStorage.removeItem("applyFormData");
+    
+      try {
+      
+      // Show toast notification (small popup)
+      showSuccess("Application submitted successfully!");
+      
+      // Clear saved data
+      localStorage.removeItem("applyFormData");
+      
+      // Optional: redirect after 2 seconds
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+      
+    } catch (error) {
+      showError("Something went wrong. Please try again.");
+    }
   };
 
   return (

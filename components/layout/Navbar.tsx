@@ -9,9 +9,10 @@ import { Menu, X, Video, Lightbulb, Users, BookOpen, Rocket, Zap, LogOut, Layout
 import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { clerkUserToAuthUser } from "@/lib/auth";
-import { useTheme } from "@/components/layout/ThemeProvider";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 const NAV_LINKS = [
+  { label: "Discover",  href: "/discover",  icon: Sparkles },
   { label: "Connect",   href: "/connect",   icon: Video },
   { label: "Ventures",  href: "/ventures",  icon: Lightbulb },
   { label: "Experts",   href: "/experts",   icon: Users },
@@ -25,8 +26,6 @@ export function Navbar() {
   const pathname = usePathname();
   const router   = useRouter();
 
-  // Theme management
-  const { theme, toggle: toggleTheme } = useTheme();
 
   // Clerk auth state
   const { user: clerkUser, isSignedIn, isLoaded } = useUser();
@@ -95,8 +94,8 @@ export function Navbar() {
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
                     pathname === link.href
-                      ? "text-[var(--accent-indigo)] bg-[rgba(91,108,255,0.1)] border border-[rgba(91,108,255,0.2)]"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                      ? "text-primary-500 dark:text-primary-400 bg-primary-500/10 dark:bg-primary-500/20 border border-primary-500/20 dark:border-primary-500/30 shadow-[0_0_12px_rgba(91,108,255,0.1)]"
+                      : "text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-all duration-200"
                   )}
                 >
                   <link.icon className="size-3.5" />
@@ -112,6 +111,7 @@ export function Navbar() {
                 <div className="size-8 rounded-full animate-pulse" style={{ backgroundColor: "var(--bg-surface-2)" }} />
               ) : isSignedIn && user ? (
                 <>
+                  <NotificationBell />
                   <Link
                     href={dashboardHref}
                     className="btn-ghost text-sm py-2 px-4 flex items-center gap-1.5"
@@ -160,39 +160,21 @@ export function Navbar() {
                 </>
               )}
               
-              {/* Theme toggle button */}
-              <button
-                onClick={toggleTheme}
-                className="ml-2 p-2 rounded-lg transition-all duration-200 flex items-center justify-center"
-                style={{
-                  backgroundColor: "var(--bg-surface-2)",
-                  color: "var(--text-primary)",
-                  border: "1px solid var(--border-default)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "var(--accent-indigo)";
-                  e.currentTarget.style.color = "white";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "var(--bg-surface-2)";
-                  e.currentTarget.style.color = "var(--text-primary)";
-                }}
-                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                aria-label={theme === "dark" ? "Light mode" : "Dark mode"}
-              >
-                {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-              </button>
+              <ThemeToggle />
             </div>
 
-            {/* Mobile hamburger */}
-            <button
-              className="lg:hidden p-2 rounded-lg transition-colors"
-              style={{ color: "var(--text-secondary)" }}
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-            </button>
+            {/* Mobile header additions */}
+            <div className="flex items-center gap-1 lg:hidden">
+              {isSignedIn && user && <NotificationBell />}
+              <button
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: "var(--text-secondary)" }}
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -253,27 +235,9 @@ export function Navbar() {
                   </>
                 )}
                 
-                {/* Mobile theme toggle */}
-                <button
-                  onClick={() => {
-                    toggleTheme();
-                    setMobileOpen(false);
-                  }}
-                  className="btn-outline w-full justify-center flex items-center gap-2 mt-2"
-                  title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                >
-                  {theme === "dark" ? (
-                    <>
-                      <Sun className="size-4" />
-                      Light Mode
-                    </>
-                  ) : (
-                    <>
-                      <Moon className="size-4" />
-                      Dark Mode
-                    </>
-                  )}
-                </button>
+                <div className="flex justify-center pt-2">
+                  <ThemeToggle />
+                </div>
               </div>
             </div>
           </motion.div>
