@@ -10,7 +10,6 @@ import { Video, MessageSquare, Calendar, Search, Star, Clock, ArrowRight, Shield
 import { cn } from "@/lib/utils";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonCard from "@/components/ui/SkeletonCard";
-import { cn } from "@/lib/utils";
 
 
 const EXPERTS = [
